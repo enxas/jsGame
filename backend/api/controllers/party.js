@@ -30,24 +30,19 @@ exports.party_create = (req, res, next) => {
       });
       partyMember.save();
 
-      // const my_socket = req.app.get("my-socket");
-
+      // SOCKETS START
       const socketio = req.app.get("socketio");
-      // socketio.sockets.join(generatedPartyId);
-
-      // var selectedUser = sharedVars.socketsList.find(function(user) {
-      //   return user.userId == "5a9bb97a3de0c02720ece2c4";
-      // });
 
       console.log("----------------");
-      console.log(sharedVars.socketsList);
-      console.log("----------------");
-
-      socketio.to(generatedPartyId).emit("playerJoinedParty", {
-        name: req.userData.userId
+      Object.keys(sharedVars.socketsList).forEach(element => {
+        if (sharedVars.socketsList[element].userId == req.userData.userId) {
+          sharedVars.socketsList[element].join(generatedPartyId);
+          console.log("CREATED AND JOINED SOCKET");
+        }
       });
-      //console.log("---------------------");
-      //console.log(socketio.sockets.adapter.rooms["456"]);
+      console.log("----------------");
+
+      // SOCKETS END
 
       User.findOne({ _id: req.userData.userId }, (err, user) => {
         if (err) return res.status(200).send(err);
@@ -132,25 +127,27 @@ exports.party_join = (req, res, next) => {
                 });
                 partyMember.save();
 
-                // emmit my joining to party to party members
+                // SOCKETS START
+                // Emit my joining party to all party members
                 const socketio = req.app.get("socketio");
-                const my_socket = req.app.get("my-socket");
 
-                console.log("SOCKET ID: " + my_socket.id);
+                socketio.to(req.params.partyId).emit("playerJoinedParty", {
+                  name: req.userData.userId
+                });
 
-                my_socket.join("456");
+                console.log("----------------");
+                Object.keys(sharedVars.socketsList).forEach(element => {
+                  if (
+                    sharedVars.socketsList[element].userId ==
+                    req.userData.userId
+                  ) {
+                    sharedVars.socketsList[element].join(req.params.partyId);
+                    console.log("JOINED SOCKET");
+                  }
+                });
+                console.log("----------------");
 
-                console.log(Object.keys(socketio.sockets.sockets)); // returns array of sockets
-                console.log("current socket: " + my_socket.id);
-                console.log(socketio.sockets.adapter.rooms["456"]);
-
-                socketio
-                  .to(req.params.partyId)
-                  .emit("playerJoinedParty", { name: req.userData.userId });
-
-                // join socket room
-
-                my_socket.join(req.params.partyId);
+                // SOCKETS END
 
                 let partyMembers = [req.userData.userId];
                 for (let party of parties) {

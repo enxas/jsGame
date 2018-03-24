@@ -25,7 +25,7 @@ exports.signin = (email, password, socket, callback) => {
         }
         if (result) {
           socket.userId = String(user[0]._id);
-          sharedVars.socketsList[String(user[0]._id)] = socket;
+          sharedVars.socketsList[socket.id] = socket;
 
           const token = jwt.sign(
             {

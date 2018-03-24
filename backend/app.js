@@ -85,13 +85,9 @@ io.on("connection", socket => {
 
   // on disconnect
   socket.on("disconnect", function() {
-    console.log(
-      `[socket] User Socket ID: ${socket.id}, User ID: ${
-        socket.userid
-      } disconnected`
-    );
-    console.log(socket);
-    delete sharedVars.socketsList[socket.userid];
+    console.log(`[socket] User Socket ID: ${socket.id} disconnected`);
+
+    delete sharedVars.socketsList[socket.id];
     visitorCount -= 1;
     io.sockets.emit("visitorCountUpdated", visitorCount);
   });
