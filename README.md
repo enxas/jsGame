@@ -1,3 +1,13 @@
-To start frontend server `cd /fronend` then `npm start` then server will satrt at `localhost:3000`
+### `Opening project`
 
-To satrt backend server install dependancies then `cd /backend` then `nodemon app.js`
+Frontend: `cd /frontend` install dependancies, then `npm start` server will start at `localhost:3000`
+
+Backend: `cd /backend` install dependancies, then `nodemon app.js`
+
+### `Info`
+
+Frontend: React
+
+Backend: NodeJS
+
+Database: MongoDB

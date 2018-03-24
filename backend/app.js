@@ -17,7 +17,7 @@ const sharedVars = require("./utils/sharedVars");
 let visitorCount = 0;
 
 // global variable: process.env.MONGO_ATLAS_PW
-mongoose.connect("mongodb://localhost:27017/jsGame");
+mongoose.connect(process.env.MONGODB_SERVER);
 
 mongoose.Promise = global.Promise;
 
