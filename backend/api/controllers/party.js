@@ -33,14 +33,12 @@ exports.party_create = (req, res, next) => {
       // SOCKETS START
       const socketio = req.app.get("socketio");
 
-      console.log("----------------");
       Object.keys(sharedVars.socketsList).forEach(element => {
         if (sharedVars.socketsList[element].userId == req.userData.userId) {
           sharedVars.socketsList[element].join(generatedPartyId);
           console.log("CREATED AND JOINED SOCKET");
         }
       });
-      console.log("----------------");
 
       // SOCKETS END
 
@@ -135,7 +133,6 @@ exports.party_join = (req, res, next) => {
                   name: req.userData.userId
                 });
 
-                console.log("----------------");
                 Object.keys(sharedVars.socketsList).forEach(element => {
                   if (
                     sharedVars.socketsList[element].userId ==
@@ -145,7 +142,6 @@ exports.party_join = (req, res, next) => {
                     console.log("JOINED SOCKET");
                   }
                 });
-                console.log("----------------");
 
                 // SOCKETS END
 
@@ -173,22 +169,63 @@ exports.party_join = (req, res, next) => {
 };
 
 exports.party_leave = (req, res, next) => {
-  PartyMember.findOneAndRemove({ userId: req.userData.userId })
-    .then(doc => {
-      Party.findOneAndRemove({ creator: req.userData.userId })
-        .then(doc => {
-          // my_socket.leave(doc._id);
-        })
-        .catch(err => {
-          res.status(500).json({
-            error: err
-          });
+  Party.findOneAndRemove({ creator: req.userData.userId })
+    .then(party => {
+      if (party) {
+        PartyMember.find({ partyId: party.id })
+          .remove()
+          .exec();
+
+        // SOCKETS START
+        // Emit my leaving party to all party members
+        const socketio = req.app.get("socketio");
+
+        Object.keys(sharedVars.socketsList).forEach(element => {
+          if (sharedVars.socketsList[element].userId == req.userData.userId) {
+            sharedVars.socketsList[element].leave(party.id);
+            console.log("DISBANDED PARTY AND SOCKET");
+          }
         });
 
-      res.status(200).json({
-        message: "Party left"
-      });
-      // my_socket.leave(doc.partyId);
+        socketio.to(party.id).emit("partyDisbanded");
+
+        // SOCKETS END
+
+        res.status(200).json({
+          message: "Party disbanded"
+        });
+      } else {
+        PartyMember.findOneAndRemove({ userId: req.userData.userId })
+          .then(party => {
+            // SOCKETS START
+            // Emit my leaving party to all party members
+            const socketio = req.app.get("socketio");
+
+            Object.keys(sharedVars.socketsList).forEach(element => {
+              if (
+                sharedVars.socketsList[element].userId == req.userData.userId
+              ) {
+                sharedVars.socketsList[element].leave(party.partyId);
+                console.log("LEFT PARTY AND SOCKET");
+              }
+            });
+
+            socketio.to(party.partyId).emit("playerLeftParty", {
+              name: req.userData.userId
+            });
+
+            // SOCKETS END
+
+            res.status(200).json({
+              message: "Party left"
+            });
+          })
+          .catch(err => {
+            res.status(500).json({
+              error: err
+            });
+          });
+      }
     })
     .catch(err => {
       res.status(500).json({

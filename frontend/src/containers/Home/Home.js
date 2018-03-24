@@ -13,9 +13,9 @@ class Home extends Component {
     // }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    console.log("[Home.js] shouldComponentUpdate()");
-  }
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   console.log("[Home.js] shouldComponentUpdate()");
+  // }
 
   render() {
     let partyTile = null;

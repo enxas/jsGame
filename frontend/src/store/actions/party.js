@@ -198,3 +198,28 @@ export const playerJoinedParty = playerName => {
     dispatch(joinedParty(playerName));
   };
 };
+
+export const leftParty = playerName => {
+  return {
+    type: actionTypes.PLAYER_LEFT_PARTY,
+    playerName: playerName
+  };
+};
+
+export const playerLeftParty = playerName => {
+  return dispatch => {
+    dispatch(leftParty(playerName));
+  };
+};
+
+export const playerPartyDisbanded = () => {
+  return {
+    type: actionTypes.PLAYER_DISBANDED_PARTY
+  };
+};
+
+export const partyDisbanded = () => {
+  return dispatch => {
+    dispatch(playerPartyDisbanded());
+  };
+};

@@ -124,12 +124,31 @@ const reducer = (state = initialState, action) => {
       };
 
     case actionTypes.PLAYER_JOINED_PARTY:
-      // const partyMembers = state.partyInfo.members.push(action.playerName);
       return {
         ...state,
         partyInfo: {
           ...state.partyInfo,
           members: [...state.partyInfo.members, action.playerName]
+        }
+      };
+    case actionTypes.PLAYER_LEFT_PARTY:
+      const leftPlayers = state.partyInfo.members.filter(
+        e => e !== action.playerName
+      );
+      return {
+        ...state,
+        partyInfo: {
+          ...state.partyInfo,
+          members: leftPlayers
+        }
+      };
+    case actionTypes.PLAYER_DISBANDED_PARTY:
+      return {
+        ...state,
+        partyInfo: {
+          id: null,
+          floor: null,
+          members: []
         }
       };
 

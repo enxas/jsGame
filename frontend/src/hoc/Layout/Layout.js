@@ -36,6 +36,26 @@ class Layout extends Component {
         this.props.onPlayerJoinedParty(data.name);
         console.log("player joined my party");
       });
+
+      socket.on("playerLeftParty", data => {
+        toastr.options = {
+          closeButton: true,
+          progressBar: true
+        };
+        toastr.info("Player " + data.name + " left your party!", "Party");
+        this.props.onPlayerLeftParty(data.name);
+        console.log("player left my party");
+      });
+
+      socket.on("partyDisbanded", () => {
+        toastr.options = {
+          closeButton: true,
+          progressBar: true
+        };
+        toastr.info("Party leader disbanded party!", "Party");
+        this.props.onPartyDisbanded();
+        console.log("party disbanded");
+      });
     }
 
     //  socket.on("FromAPI", data => this.setState({ response: data }));
@@ -63,6 +83,8 @@ const mapDispatchToProps = dispatch => {
   return {
     onSetSocketinStore: socket => dispatch(actions.setSocketinStore(socket)),
     onPlayerJoinedParty: name => dispatch(actions.playerJoinedParty(name)),
+    onPlayerLeftParty: name => dispatch(actions.playerLeftParty(name)),
+    onPartyDisbanded: () => dispatch(actions.partyDisbanded()),
     onSignIn: data => dispatch(actions.signIn(data))
   };
 };
