@@ -12,6 +12,7 @@ import LeaveParty from "./containers/Party/Leave/Leave";
 import * as actions from "./store/actions/index";
 import Layout from "./hoc/Layout/Layout";
 import ListParty from "./containers/Party/List/List";
+import Battlefield from "./containers/Battlefield/Battlefield";
 
 class App extends Component {
   componentDidMount() {
@@ -32,6 +33,7 @@ class App extends Component {
         <Switch>
           <Route path="/logout" component={Logout} />
           <Route path="/home" component={Home} />
+          <Route path="/battlefield" component={Battlefield} />
           <Route path="/party/create" component={CreateParty} />
           <Route path="/party/leave" component={LeaveParty} />
           <Route path="/party/list" component={ListParty} />

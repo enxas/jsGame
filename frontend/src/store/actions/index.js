@@ -8,3 +8,4 @@ export {
   playerLeftParty,
   partyDisbanded
 } from "./party";
+export { enteredBattlefield } from "./battlefield";

@@ -56,6 +56,11 @@ class Layout extends Component {
         this.props.onPartyDisbanded();
         console.log("party disbanded");
       });
+
+      // socket.on("getMapData", data => {
+      //   this.props.onGetMapData(data);
+      //   console.log("got map data");
+      // });
     }
 
     //  socket.on("FromAPI", data => this.setState({ response: data }));
@@ -86,6 +91,7 @@ const mapDispatchToProps = dispatch => {
     onPlayerLeftParty: name => dispatch(actions.playerLeftParty(name)),
     onPartyDisbanded: () => dispatch(actions.partyDisbanded()),
     onSignIn: data => dispatch(actions.signIn(data))
+    // onGetMapData: data => dispatch(actions.getMapData(data))
   };
 };
 

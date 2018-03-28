@@ -10,6 +10,7 @@ import thunk from "redux-thunk";
 
 import signinReducer from "./store/reducers/signin";
 import partyReducer from "./store/reducers/party";
+import battlefieldReducer from "./store/reducers/battlefield";
 import axios from "axios";
 
 axios.defaults.baseURL = "http://localhost:4001";
@@ -18,7 +19,8 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const rootReducer = combineReducers({
   signIn: signinReducer,
-  party: partyReducer
+  party: partyReducer,
+  battlefield: battlefieldReducer
 });
 
 const store = createStore(
