@@ -32,7 +32,12 @@ class Home extends Component {
                 return <div key={index}>{member}</div>;
               })}
               <br />
-              <button className={["button", "is-link"].join(" ")}>Join</button>
+              <Link
+                className={["button", "is-link"].join(" ")}
+                to="/battlefield"
+              >
+                Enter Dungeon
+              </Link>
             </div>
           </div>
         </div>

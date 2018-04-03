@@ -1,7 +1,7 @@
 import * as actionTypes from "./actionTypes";
 import axios from "axios";
 
-export const setMapData = data => {
+export const getBattlefieldData = data => {
   return {
     type: actionTypes.GET_MAP_DATA,
     field: data.field
@@ -15,7 +15,7 @@ export const enteredBattlefield = () => {
     axios
       .get(url)
       .then(response => {
-        dispatch(setMapData(response.data));
+        dispatch(getBattlefieldData(response.data));
       })
       .catch(err => {
         console.log(err);
