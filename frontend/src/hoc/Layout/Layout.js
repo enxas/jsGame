@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { Redirect } from "react-router-dom";
 import Navbar from "../../containers/Navbar/Navbar";
 import Wrap from "../Wrap/Wrap";
 import socketIOClient from "socket.io-client";
 import * as actions from "../../store/actions/index";
 import toastr from "toastr";
+import { withRouter } from "react-router-dom";
 
 class Layout extends Component {
   state = {
@@ -57,6 +59,15 @@ class Layout extends Component {
         console.log("party disbanded");
       });
 
+      socket.on("leaderEnteredBattlefield", data => {
+        toastr.options = {
+          closeButton: true,
+          progressBar: true
+        };
+        toastr.info("Party leader entered battlefield!", "Party");
+        this.props.onleaderEnteredBattlefield(data);
+      });
+
       // socket.on("getMapData", data => {
       //   this.props.onGetMapData(data);
       //   console.log("got map data");
@@ -68,8 +79,15 @@ class Layout extends Component {
   }
 
   render() {
+    let redirect = null;
+    if (this.props.redirectToBattlefield !== false) {
+      console.log("REDIRECTED");
+      this.props.history.push("/battlefield");
+      // redirect = <Redirect to="/battlefield" />;
+    }
     return (
       <Wrap>
+        {redirect}
         <Navbar visitorCount={this.state.visitorCount} />
 
         <main>{this.props.children}</main>
@@ -80,7 +98,9 @@ class Layout extends Component {
 
 const mapStateToProps = state => {
   return {
-    socket: state.signIn.socket
+    socket: state.signIn.socket,
+    field: state.battlefield.field,
+    redirectToBattlefield: state.battlefield.redirectToBattlefield
   };
 };
 
@@ -90,9 +110,10 @@ const mapDispatchToProps = dispatch => {
     onPlayerJoinedParty: name => dispatch(actions.playerJoinedParty(name)),
     onPlayerLeftParty: name => dispatch(actions.playerLeftParty(name)),
     onPartyDisbanded: () => dispatch(actions.partyDisbanded()),
-    onSignIn: data => dispatch(actions.signIn(data))
-    // onGetMapData: data => dispatch(actions.getMapData(data))
+    onSignIn: data => dispatch(actions.signIn(data)),
+    onleaderEnteredBattlefield: data =>
+      dispatch(actions.leaderEnteredBattlefield(data))
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Layout);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Layout));

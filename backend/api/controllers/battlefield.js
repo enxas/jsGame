@@ -63,43 +63,58 @@ exports.mapData = (req, res, next) => {
       PartyMember.find({ partyId: party._id })
       .exec()
       .then(partymembers => {
-      
-        const battlefield = new Battlefield({
+
+        const battlefieldData = {
           _id: mongoose.Types.ObjectId(),
           partyId: party._id,
           actors: [{ 
             "floor": 1,
             "players":
-            partymembers.map(member => {
+            partymembers.map((member, index) => {
              
               return {
                 [member.userId]: {
                   health: 100,
                   x: 3,
-                  y: 3
+                  y: 3+index,
+                  inBattlefield: false
                 }
               }
             }),
             "enemies": 
-            worldEnemies.map(enemies => {
+            worldEnemies.map((enemies, index) => {
              
               return {
                 [enemies.id]: {
                   health: enemies.health,
                   x: enemies.x,
-                  y: enemies.y
+                  y: enemies.y+index
                 }
               }
             }),
          
           }]
-        });
+        };
+   
+        const battlefield = new Battlefield(
+          battlefieldData
+        );
         battlefield.save();
+
+      // SOCKETS START
+      const socketio = req.app.get("socketio");
+
+      socketio.to(party._id).emit("leaderEnteredBattlefield", {
+        battlefieldData: battlefieldData,
+        field: worldReformed
+      });
+
+      // SOCKETS END
   
         return res.status(200).json({
           error: false,
-          message: "Entered battlefield!",
-          field: worldReformed
+          message: "Entered battlefield!"
+          
         });
 
 

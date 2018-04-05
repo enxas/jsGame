@@ -71,14 +71,17 @@ class Battlefield extends Component {
   }
 
   componentDidMount() {
-    this.props.onEnteredBattlefield();
+    console.log(` Battlefield.js componentDidMount`);
+    this.props.onRedirectedToBattlefield();
+    this.drawField(this.props.field);
+    // this.props.onEnteredBattlefield();
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.field !== null) {
-      this.drawField(nextProps.field);
-    }
-  }
+  // componentWillReceiveProps(nextProps) {
+  //   if (nextProps.redirectToBattlefield === true) {
+  //     this.props.onRedirectedToBattlefield();
+  //   }
+  // }
 
   render() {
     return (
@@ -137,13 +140,14 @@ const mapStateToProps = state => {
     error: state.party.error,
     message: state.party.message,
     socket: state.signIn.socket,
-    field: state.battlefield.field
+    field: state.battlefield.field,
+    redirectToBattlefield: state.battlefield.redirectToBattlefield
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    onEnteredBattlefield: () => dispatch(actions.enteredBattlefield())
+    onRedirectedToBattlefield: () => dispatch(actions.redirectedToBattlefield())
   };
 };
 

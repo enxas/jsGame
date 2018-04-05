@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
+import * as actions from "../../store/actions/index";
 
 class Home extends Component {
   componentDidMount() {
@@ -13,9 +14,18 @@ class Home extends Component {
     // }
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   console.log("[Home.js] shouldComponentUpdate()");
-  // }
+  handleBattlefieldEnter = () => {
+    console.log("pressed handleBattlefieldEnter button");
+
+    this.props.onEnteredBattlefield();
+
+    // this.props.onSignIn(this.state.email, this.state.password);
+
+    // this.setState(() => ({
+    //   isButtonLoading: ["button", "is-success"],
+    //   isAuthenticated: true
+    // }));
+  };
 
   render() {
     let partyTile = null;
@@ -32,12 +42,12 @@ class Home extends Component {
                 return <div key={index}>{member}</div>;
               })}
               <br />
-              <Link
+              <button
                 className={["button", "is-link"].join(" ")}
-                to="/battlefield"
+                onClick={this.handleBattlefieldEnter}
               >
                 Enter Dungeon
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -82,4 +92,10 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, null)(Home);
+const mapDispatchToProps = dispatch => {
+  return {
+    onEnteredBattlefield: () => dispatch(actions.enteredBattlefield())
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
