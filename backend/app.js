@@ -13,6 +13,7 @@ const authRoutes = require("./api/routes/user");
 const battlefieldRoutes = require("./api/routes/battlefield");
 
 const utils_signin = require("./utils/signin");
+const utils_battlefield = require("./utils/battlefield");
 const sharedVars = require("./utils/sharedVars");
 const myFunctions = require('./utils/reformWorld');
 
@@ -52,62 +53,33 @@ io.on("connection", socket => {
   console.log(`[socket] User ${socket.id} connected`);
 
   socket.on("signIn", data => {
-    const signin_cb = result => {
+    const callback = result => {
       socket.emit("signInResponse", result);
     };
 
-    utils_signin.signin(data.email, data.password, socket, signin_cb);
-
-    //     isValidPassword(data, function (res) {
-    //         if (res) {
-    //             Player.onConnect(socket, data.username);
-    //             socket.emit('signInResponse', { success: true });
-    //             socket.emit('newTurn', { actorsName: Object.keys(Player.list)[0] });
-    //             socket.emit('updateMovePoints', movePoints);
-
-    //             io.sockets.emit('drawGrid2', {'world': worldReformed});
-
-    //             actorsName = Object.keys(Player.list)[0];
-    //         } else {
-    //             socket.emit('signInResponse', { success: false });
-    //         }
-    //     });
+    utils_signin.signin(data.email, data.password, socket, callback);
   });
 
-  // socket_list[socket.id] = socket;
-  // // when there is a user on the site
-  // visitorCount += 1;
-  // io.sockets.emit("visitorCountUpdated", visitorCount);
+   socket.on("connectedToBattlefield", () => {
+    const callback = data => {
+      io.to(data.partyId).emit("onConnectedToBattlefield", {
+        userId: data.userId
+      });
+    };
 
-  // socket.on("helloFromClient", function(data) {
-  //   console.log(`[socket] on.helloFromClient`);
-  //   io.to("8633").emit("some event");
-  //   socket.emit("helloFromClientResponse", { message: "hello " + data.name });
-  // });
-
-   socket.on("enteredBattlefield", () => {
-    var world = [
-      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        ]; 
-
-    let worldReformed = myFunctions.reformWorld(world);
-    socket.emit("getMapData", { field: worldReformed});
+    utils_battlefield.connectToBattlefield(socket, callback);
   });
+
+  socket.on("disconnectedFromBattlefield", () => {
+    const callback = data => {
+      io.to(data.partyId).emit("onDisconnectedFromBattlefield", {
+        userId: data.userId
+      });
+    };
+
+    utils_battlefield.disconnectFromBattlefield(socket, callback);
+  });
+  
 
 
   // on disconnect

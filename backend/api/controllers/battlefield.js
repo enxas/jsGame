@@ -67,8 +67,9 @@ exports.mapData = (req, res, next) => {
         const battlefieldData = {
           _id: mongoose.Types.ObjectId(),
           partyId: party._id,
-          actors: [{ 
-            "floor": 1,
+          "floor": 1,
+          actors: { 
+            
             "players":
             partymembers.map((member, index) => {
              
@@ -77,7 +78,7 @@ exports.mapData = (req, res, next) => {
                   health: 100,
                   x: 3,
                   y: 3+index,
-                  inBattlefield: false
+                  isConnected: false
                 }
               }
             }),
@@ -93,8 +94,8 @@ exports.mapData = (req, res, next) => {
               }
             }),
          
-          }]
-        };
+          }
+        }; 
    
         const battlefield = new Battlefield(
           battlefieldData

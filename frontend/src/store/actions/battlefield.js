@@ -39,7 +39,7 @@ export const leaderEnteredBattlefield = data => {
     dispatch(setBattlefieldDataOnLeaderEnter(data));
   };
 };
-
+///////////////////////////////
 export const onRedirectedToBattlefield = () => {
   return {
     type: actionTypes.REDIRECTED_TO_BATTLEFIELD
@@ -49,6 +49,32 @@ export const onRedirectedToBattlefield = () => {
 export const redirectedToBattlefield = () => {
   return dispatch => {
     dispatch(onRedirectedToBattlefield());
+  };
+};
+///////////////////////////////////
+export const onPlayerEnteredBattlefield = data => {
+  return {
+    type: actionTypes.PLAYER_ENTERED_BATTLEFIELD,
+    userId: data
+  };
+};
+
+export const playerEnteredBattlefield = data => {
+  return dispatch => {
+    dispatch(onPlayerEnteredBattlefield(data));
+  };
+};
+
+export const onPlayerLeftBattlefield = data => {
+  return {
+    type: actionTypes.PLAYER_LEFT_BATTLEFIELD,
+    userId: data
+  };
+};
+
+export const playerLeftBattlefield = data => {
+  return dispatch => {
+    dispatch(onPlayerLeftBattlefield(data));
   };
 };
 

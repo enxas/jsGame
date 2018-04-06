@@ -65,7 +65,33 @@ class Layout extends Component {
           progressBar: true
         };
         toastr.info("Party leader entered battlefield!", "Party");
-        this.props.onleaderEnteredBattlefield(data);
+        this.props.onLeaderEnteredBattlefield(data);
+      });
+
+      socket.on("onConnectedToBattlefield", data => {
+        toastr.options = {
+          closeButton: true,
+          progressBar: true
+        };
+        toastr.info(
+          "Player " + data.userId + " connected to battlefield!",
+          "Party"
+        );
+        this.props.onPlayerEnteredBattlefield(data.userId);
+        console.log("player connected to battlefield");
+      });
+
+      socket.on("onDisconnectedFromBattlefield", data => {
+        toastr.options = {
+          closeButton: true,
+          progressBar: true
+        };
+        toastr.info(
+          "Player " + data.userId + " connected to battlefield!",
+          "Party"
+        );
+        this.props.onPlayerLeftBattlefield(data.userId);
+        console.log("player disconnected from battlefield");
       });
 
       // socket.on("getMapData", data => {
@@ -111,8 +137,12 @@ const mapDispatchToProps = dispatch => {
     onPlayerLeftParty: name => dispatch(actions.playerLeftParty(name)),
     onPartyDisbanded: () => dispatch(actions.partyDisbanded()),
     onSignIn: data => dispatch(actions.signIn(data)),
-    onleaderEnteredBattlefield: data =>
-      dispatch(actions.leaderEnteredBattlefield(data))
+    onLeaderEnteredBattlefield: data =>
+      dispatch(actions.leaderEnteredBattlefield(data)),
+    onPlayerEnteredBattlefield: data =>
+      dispatch(actions.playerEnteredBattlefield(data)),
+    onPlayerLeftBattlefield: data =>
+      dispatch(actions.playerLeftBattlefield(data))
   };
 };
 

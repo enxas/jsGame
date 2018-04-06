@@ -8,10 +8,13 @@ import spritesheetPNG from "../../assets/images/spritesheet.png";
 
 class Battlefield extends Component {
   state = {
-    windowHeight: 0
+    windowHeight: 0,
+    allLoadedImages: null
   };
 
   drawField(fieldArr) {
+    const componentTHIS = this;
+
     const windowWidth = window.innerWidth - 300;
     const windowHeight = window.innerHeight - 200;
 
@@ -25,15 +28,14 @@ class Battlefield extends Component {
     const tileHeight = 32;
 
     const canvas1 = this.refs.canvas1;
-    const canvas2 = this.refs.canvas2;
 
     canvas1.width = worldWidth * tileWidth; // windowWidth
     canvas1.height = worldHeight * tileHeight; // windowHeight
 
     const ctx1 = canvas1.getContext("2d");
-    const ctx2 = canvas2.getContext("2d");
+
     ///////////////////////////////////////////
-    const ground = ["0", "1"];
+    const ground = ["0", "1", "player"];
     var tiles = ground; // getUniqueArray(ground) ["0", "1", "3"]
 
     var promiseOfAllImages = function(tiles) {
@@ -56,6 +58,7 @@ class Battlefield extends Component {
 
     promiseOfAllImages(tiles).then(function(allImages) {
       console.log("All images are loaded!", allImages); // [Img, Img, Img]
+      componentTHIS.state.allLoadedImages = allImages;
       draw(tiles, allImages, ground);
     });
 
@@ -67,6 +70,8 @@ class Battlefield extends Component {
           ctx1.drawImage(images[fieldArr[x][y]], x * tileW, y * tileH);
         }
       }
+      // emit this when assets are loaded and drawn then player conects to battlefield
+      componentTHIS.props.socket.emit("connectedToBattlefield");
     }
   }
 
@@ -82,6 +87,45 @@ class Battlefield extends Component {
   //     this.props.onRedirectedToBattlefield();
   //   }
   // }
+  componentWillUnmount() {
+    this.props.socket.emit("disconnectedFromBattlefield");
+  }
+
+  componentWillUpdate(nextProps) {
+    this.props.battlefieldData.actors.players.map(player => {
+      if (
+        player[Object.keys(player)[0]].isConnected !==
+        nextProps.battlefieldData.actors.players[0][Object.keys(player)[0]]
+          .isConnected
+      ) {
+        console.log(`nextprops is connected changed`);
+        this.drawLayer2(
+          this.state.allLoadedImages,
+          player[Object.keys(player)[0]].x,
+          player[Object.keys(player)[0]].y
+        );
+      }
+    });
+  }
+
+  drawLayer2(images, x, y) {
+    const worldWidth = 25;
+    const worldHeight = 16;
+    const tileWidth = 32;
+    const tileHeight = 32;
+
+    const canvas2 = this.refs.canvas2;
+
+    canvas2.width = worldWidth * tileWidth; // windowWidth
+    canvas2.height = worldHeight * tileHeight; // windowHeight
+
+    const ctx2 = canvas2.getContext("2d");
+
+    var tileW = 32;
+    var tileH = 32;
+
+    ctx2.drawImage(images[2], x * tileW, y * tileH);
+  }
 
   render() {
     return (
@@ -141,7 +185,8 @@ const mapStateToProps = state => {
     message: state.party.message,
     socket: state.signIn.socket,
     field: state.battlefield.field,
-    redirectToBattlefield: state.battlefield.redirectToBattlefield
+    redirectToBattlefield: state.battlefield.redirectToBattlefield,
+    battlefieldData: state.battlefield.battlefieldData
   };
 };
 
