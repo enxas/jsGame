@@ -33,11 +33,12 @@ const reducer = (state = initialState, action) => {
         JSON.stringify(state.battlefieldData.actors.players)
       );
 
-      newPlayersObject.map(player => {
-        if (player[action.userId].isConnected === false) {
-          player[action.userId].isConnected = true;
+      for (let playerId in newPlayersObject) {
+        // if (newPlayersObject[playerId].isConnected === false) {
+        if (playerId === action.userId) {
+          newPlayersObject[playerId].isConnected = true;
         }
-      });
+      }
 
       return {
         ...state,
@@ -49,16 +50,18 @@ const reducer = (state = initialState, action) => {
           }
         }
       };
+
     case actionTypes.PLAYER_LEFT_BATTLEFIELD:
       let newPlayersObject2 = JSON.parse(
         JSON.stringify(state.battlefieldData.actors.players)
       );
 
-      newPlayersObject2.map(player => {
-        if (player[action.userId].isConnected === true) {
-          player[action.userId].isConnected = false;
+      for (let playerId2 in newPlayersObject2) {
+        // if (newPlayersObject2[playerId2].isConnected === true) {
+        if (playerId2 === action.userId) {
+          newPlayersObject2[playerId2].isConnected = false;
         }
-      });
+      }
 
       return {
         ...state,

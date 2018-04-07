@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Redirect } from "react-router-dom";
 import Navbar from "../../containers/Navbar/Navbar";
 import Wrap from "../Wrap/Wrap";
 import socketIOClient from "socket.io-client";
@@ -78,7 +77,9 @@ class Layout extends Component {
           "Party"
         );
         this.props.onPlayerEnteredBattlefield(data.userId);
-        console.log("player connected to battlefield");
+        console.log(
+          "[Layout.js] Player " + data.userId + " connected to a battlefield!"
+        );
       });
 
       socket.on("onDisconnectedFromBattlefield", data => {
@@ -87,11 +88,15 @@ class Layout extends Component {
           progressBar: true
         };
         toastr.info(
-          "Player " + data.userId + " connected to battlefield!",
+          "Player " + data.userId + " disconnected from battlefield!",
           "Party"
         );
         this.props.onPlayerLeftBattlefield(data.userId);
-        console.log("player disconnected from battlefield");
+        console.log(
+          "[Layout.js] Player " +
+            data.userId +
+            " disconnected from a battlefield!"
+        );
       });
 
       // socket.on("getMapData", data => {

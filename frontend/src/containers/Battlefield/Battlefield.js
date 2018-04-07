@@ -1,10 +1,6 @@
 import React, { Component } from "react";
-import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import * as actions from "../../store/actions/index";
-import toastr from "toastr";
-import { func1, func2 } from "../../utils/drawGrid";
-import spritesheetPNG from "../../assets/images/spritesheet.png";
 
 class Battlefield extends Component {
   state = {
@@ -35,7 +31,7 @@ class Battlefield extends Component {
     const ctx1 = canvas1.getContext("2d");
 
     ///////////////////////////////////////////
-    const ground = ["0", "1", "player"];
+    const ground = ["0", "1", "player", "enemy"];
     var tiles = ground; // getUniqueArray(ground) ["0", "1", "3"]
 
     var promiseOfAllImages = function(tiles) {
@@ -60,6 +56,16 @@ class Battlefield extends Component {
       console.log("All images are loaded!", allImages); // [Img, Img, Img]
       componentTHIS.state.allLoadedImages = allImages;
       draw(tiles, allImages, ground);
+
+      // draw enemies
+      for (let enemyId in componentTHIS.props.battlefieldData.actors.enemies) {
+        componentTHIS.drawLayer2(
+          componentTHIS.state.allLoadedImages,
+          componentTHIS.props.battlefieldData.actors.enemies[enemyId].x,
+          componentTHIS.props.battlefieldData.actors.enemies[enemyId].y,
+          3
+        );
+      }
     });
 
     function draw(tiles, images, ground) {
@@ -79,7 +85,6 @@ class Battlefield extends Component {
     console.log(` Battlefield.js componentDidMount`);
     this.props.onRedirectedToBattlefield();
     this.drawField(this.props.field);
-    // this.props.onEnteredBattlefield();
   }
 
   // componentWillReceiveProps(nextProps) {
@@ -92,23 +97,51 @@ class Battlefield extends Component {
   }
 
   componentWillUpdate(nextProps) {
-    this.props.battlefieldData.actors.players.map(player => {
+    for (let playerId in this.props.battlefieldData.actors.players) {
       if (
-        player[Object.keys(player)[0]].isConnected !==
-        nextProps.battlefieldData.actors.players[0][Object.keys(player)[0]]
-          .isConnected
+        this.props.battlefieldData.actors.players[playerId].isConnected !==
+        nextProps.battlefieldData.actors.players[playerId].isConnected
       ) {
-        console.log(`nextprops is connected changed`);
-        this.drawLayer2(
-          this.state.allLoadedImages,
-          player[Object.keys(player)[0]].x,
-          player[Object.keys(player)[0]].y
+        console.log(
+          `[Battlefield.js] Player connected/disconnected from a battlefield`
         );
+        if (
+          nextProps.battlefieldData.actors.players[playerId].isConnected ===
+          true
+        ) {
+          console.log(
+            `Drawing Player sprite at x: ${
+              this.props.battlefieldData.actors.players[playerId].x
+            }, y: ${this.props.battlefieldData.actors.players[playerId].y}`
+          );
+          this.drawLayer2(
+            this.state.allLoadedImages,
+            this.props.battlefieldData.actors.players[playerId].x,
+            this.props.battlefieldData.actors.players[playerId].y,
+            2
+          );
+        }
+        if (
+          nextProps.battlefieldData.actors.players[playerId].isConnected ===
+          false
+        ) {
+          console.log(
+            `Drawing Grass sprite at x: ${
+              this.props.battlefieldData.actors.players[playerId].x
+            }, y: ${this.props.battlefieldData.actors.players[playerId].y}`
+          );
+          this.drawLayer2(
+            this.state.allLoadedImages,
+            this.props.battlefieldData.actors.players[playerId].x,
+            this.props.battlefieldData.actors.players[playerId].y,
+            0
+          );
+        }
       }
-    });
+    }
   }
 
-  drawLayer2(images, x, y) {
+  drawLayer2(images, x, y, spriteId) {
     const worldWidth = 25;
     const worldHeight = 16;
     const tileWidth = 32;
@@ -116,15 +149,20 @@ class Battlefield extends Component {
 
     const canvas2 = this.refs.canvas2;
 
-    canvas2.width = worldWidth * tileWidth; // windowWidth
-    canvas2.height = worldHeight * tileHeight; // windowHeight
+    if (
+      canvas2.width !== worldWidth * tileWidth &&
+      canvas2.height !== worldHeight * tileHeight
+    ) {
+      canvas2.width = worldWidth * tileWidth; // windowWidth
+      canvas2.height = worldHeight * tileHeight; // windowHeight
+    }
 
     const ctx2 = canvas2.getContext("2d");
 
     var tileW = 32;
     var tileH = 32;
 
-    ctx2.drawImage(images[2], x * tileW, y * tileH);
+    ctx2.drawImage(images[spriteId], x * tileW, y * tileH);
   }
 
   render() {

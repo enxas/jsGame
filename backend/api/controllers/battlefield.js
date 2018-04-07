@@ -64,36 +64,32 @@ exports.mapData = (req, res, next) => {
       .exec()
       .then(partymembers => {
 
+        const playersObj = {};
+        partymembers.map((member, index) => {
+          playersObj[member.userId] = {
+            health: 100,
+            x: 3,
+            y: 3+index,
+            isConnected: false
+          };
+        });
+
+        const enemiesObj = {};
+        worldEnemies.map((enemies, index) => {
+          enemiesObj[enemies.id] = {
+            health: enemies.health,
+            x: enemies.x,
+            y: enemies.y+index
+          };
+        });
+
         const battlefieldData = {
           _id: mongoose.Types.ObjectId(),
           partyId: party._id,
           "floor": 1,
-          actors: { 
-            
-            "players":
-            partymembers.map((member, index) => {
-             
-              return {
-                [member.userId]: {
-                  health: 100,
-                  x: 3,
-                  y: 3+index,
-                  isConnected: false
-                }
-              }
-            }),
-            "enemies": 
-            worldEnemies.map((enemies, index) => {
-             
-              return {
-                [enemies.id]: {
-                  health: enemies.health,
-                  x: enemies.x,
-                  y: enemies.y+index
-                }
-              }
-            }),
-         
+          actors: {
+            "players": playersObj,
+            "enemies": enemiesObj
           }
         }; 
    
@@ -101,6 +97,7 @@ exports.mapData = (req, res, next) => {
           battlefieldData
         );
         battlefield.save();
+      
 
       // SOCKETS START
       const socketio = req.app.get("socketio");

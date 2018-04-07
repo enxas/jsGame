@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Party = require("../../models/party");
 const PartyMember = require("../../models/partyMember");
 const User = require("../../models/user");
+const Battlefield = require("../../models/battlefield");
 
 const sharedVars = require("../../utils/sharedVars");
 
@@ -173,6 +174,9 @@ exports.party_leave = (req, res, next) => {
     .then(party => {
       if (party) {
         PartyMember.find({ partyId: party.id })
+          .remove()
+          .exec();
+          Battlefield.find({ partyId: party.id })
           .remove()
           .exec();
 
