@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const battlefieldSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     partyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Party', required: true, unique: true },
-    actors: [{}]
+    actors: {}
 });
 
 // battlefieldSchema.statics.findOneOrCreate = function findOneOrCreate(condition, callback) {

@@ -87,7 +87,7 @@ exports.mapData = (req, res, next) => {
           _id: mongoose.Types.ObjectId(),
           partyId: party._id,
           "floor": 1,
-          actors: {
+          "actors": {
             "players": playersObj,
             "enemies": enemiesObj
           }

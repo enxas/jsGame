@@ -99,6 +99,35 @@ class Layout extends Component {
         );
       });
 
+      socket.on("onMovedInBattlefield", data => {
+        toastr.options = {
+          closeButton: true,
+          progressBar: true
+        };
+        toastr.info(
+          "Player " + data.userId + " moved " + data.directionMoved + "!",
+          "Party"
+        );
+        console.log(`USER ID: ${this.props.userId} USER ID: ${data.userId}`);
+        if (data.userId === this.props.userId) {
+          console.log(`USER ID ARE EQUAL`);
+          data.isItMeMoving = true;
+        } else {
+          data.isItMeMoving = false;
+        }
+        data.x = this.props.battlefieldData.actors.players[data.userId].x;
+        data.y = this.props.battlefieldData.actors.players[data.userId].y;
+
+        this.props.onMovedInBattlefield(data);
+        console.log(
+          "[Layout.js]  Player " +
+            data.userId +
+            " moved " +
+            data.directionMoved +
+            "!"
+        );
+      });
+
       // socket.on("getMapData", data => {
       //   this.props.onGetMapData(data);
       //   console.log("got map data");
@@ -129,9 +158,11 @@ class Layout extends Component {
 
 const mapStateToProps = state => {
   return {
+    userId: state.signIn.userId,
     socket: state.signIn.socket,
     field: state.battlefield.field,
-    redirectToBattlefield: state.battlefield.redirectToBattlefield
+    redirectToBattlefield: state.battlefield.redirectToBattlefield,
+    battlefieldData: state.battlefield.battlefieldData
   };
 };
 
@@ -147,7 +178,8 @@ const mapDispatchToProps = dispatch => {
     onPlayerEnteredBattlefield: data =>
       dispatch(actions.playerEnteredBattlefield(data)),
     onPlayerLeftBattlefield: data =>
-      dispatch(actions.playerLeftBattlefield(data))
+      dispatch(actions.playerLeftBattlefield(data)),
+    onMovedInBattlefield: data => dispatch(actions.movedInBattlefield(data))
   };
 };
 

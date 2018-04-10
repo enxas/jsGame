@@ -41,7 +41,7 @@ exports.signin = (email, password, socket, callback) => {
             error: false,
             message: "Auth successful",
             idToken: token,
-            localId: user[0].email,
+            localId: user[0]._id,
             expiresIn: 3600 * 5
           });
         }

@@ -81,10 +81,53 @@ class Battlefield extends Component {
     }
   }
 
+  layer2Loop() {
+    const worldWidth = 25;
+    const worldHeight = 16;
+    const tileWidth = 32;
+    const tileHeight = 32;
+
+    const canvas2 = this.refs.canvas2;
+    const globalTHIS = this;
+
+    if (
+      canvas2.width !== worldWidth * tileWidth &&
+      canvas2.height !== worldHeight * tileHeight
+    ) {
+      canvas2.width = worldWidth * tileWidth; // windowWidth
+      canvas2.height = worldHeight * tileHeight; // windowHeight
+    }
+
+    const ctx2 = canvas2.getContext("2d");
+
+    var tileW = 32;
+    var tileH = 32;
+
+    setInterval(function() {
+      // ctx2.fillStyle = "rgba(255, 255, 255, 0.5)";
+      // ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
+      ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+
+      for (let playerId in globalTHIS.props.battlefieldData.actors.players) {
+        if (
+          globalTHIS.props.battlefieldData.actors.players[playerId]
+            .isConnected === true
+        ) {
+          ctx2.drawImage(
+            globalTHIS.state.allLoadedImages[2],
+            globalTHIS.props.battlefieldData.actors.players[playerId].x * tileW,
+            globalTHIS.props.battlefieldData.actors.players[playerId].y * tileH
+          );
+        }
+      }
+    }, 200);
+  }
+
   componentDidMount() {
     console.log(` Battlefield.js componentDidMount`);
     this.props.onRedirectedToBattlefield();
     this.drawField(this.props.field);
+    this.layer2Loop();
   }
 
   // componentWillReceiveProps(nextProps) {
@@ -96,50 +139,50 @@ class Battlefield extends Component {
     this.props.socket.emit("disconnectedFromBattlefield");
   }
 
-  componentWillUpdate(nextProps) {
-    for (let playerId in this.props.battlefieldData.actors.players) {
-      if (
-        this.props.battlefieldData.actors.players[playerId].isConnected !==
-        nextProps.battlefieldData.actors.players[playerId].isConnected
-      ) {
-        console.log(
-          `[Battlefield.js] Player connected/disconnected from a battlefield`
-        );
-        if (
-          nextProps.battlefieldData.actors.players[playerId].isConnected ===
-          true
-        ) {
-          console.log(
-            `Drawing Player sprite at x: ${
-              this.props.battlefieldData.actors.players[playerId].x
-            }, y: ${this.props.battlefieldData.actors.players[playerId].y}`
-          );
-          this.drawLayer2(
-            this.state.allLoadedImages,
-            this.props.battlefieldData.actors.players[playerId].x,
-            this.props.battlefieldData.actors.players[playerId].y,
-            2
-          );
-        }
-        if (
-          nextProps.battlefieldData.actors.players[playerId].isConnected ===
-          false
-        ) {
-          console.log(
-            `Drawing Grass sprite at x: ${
-              this.props.battlefieldData.actors.players[playerId].x
-            }, y: ${this.props.battlefieldData.actors.players[playerId].y}`
-          );
-          this.drawLayer2(
-            this.state.allLoadedImages,
-            this.props.battlefieldData.actors.players[playerId].x,
-            this.props.battlefieldData.actors.players[playerId].y,
-            0
-          );
-        }
-      }
-    }
-  }
+  // componentWillUpdate(nextProps) {
+  // for (let playerId in this.props.battlefieldData.actors.players) {
+  //   if (
+  //     this.props.battlefieldData.actors.players[playerId].isConnected !==
+  //     nextProps.battlefieldData.actors.players[playerId].isConnected
+  //   ) {
+  //     console.log(
+  //       `[Battlefield.js] Player connected/disconnected from a battlefield`
+  //     );
+  //     if (
+  //       nextProps.battlefieldData.actors.players[playerId].isConnected ===
+  //       true
+  //     ) {
+  //       console.log(
+  //         `Drawing Player sprite at x: ${
+  //           this.props.battlefieldData.actors.players[playerId].x
+  //         }, y: ${this.props.battlefieldData.actors.players[playerId].y}`
+  //       );
+  //       this.drawLayer2(
+  //         this.state.allLoadedImages,
+  //         this.props.battlefieldData.actors.players[playerId].x,
+  //         this.props.battlefieldData.actors.players[playerId].y,
+  //         2
+  //       );
+  //     }
+  //     if (
+  //       nextProps.battlefieldData.actors.players[playerId].isConnected ===
+  //       false
+  //     ) {
+  //       console.log(
+  //         `Drawing Grass sprite at x: ${
+  //           this.props.battlefieldData.actors.players[playerId].x
+  //         }, y: ${this.props.battlefieldData.actors.players[playerId].y}`
+  //       );
+  //       this.drawLayer2(
+  //         this.state.allLoadedImages,
+  //         this.props.battlefieldData.actors.players[playerId].x,
+  //         this.props.battlefieldData.actors.players[playerId].y,
+  //         0
+  //       );
+  //     }
+  //   }
+  // }
+  // }
 
   drawLayer2(images, x, y, spriteId) {
     const worldWidth = 25;
@@ -165,6 +208,21 @@ class Battlefield extends Component {
     ctx2.drawImage(images[spriteId], x * tileW, y * tileH);
   }
 
+  handleSubmit = moveDirection => {
+    console.log(`moved ${moveDirection}`);
+
+    this.props.socket.emit("movedInBattlefield", {
+      direction: moveDirection
+    });
+
+    // this.props.onSignIn(this.state.email, this.state.password);
+
+    // this.setState(() => ({
+    //   isButtonLoading: ["button", "is-success"],
+    //   isAuthenticated: true
+    // }));
+  };
+
   render() {
     return (
       <div>
@@ -185,6 +243,39 @@ class Battlefield extends Component {
               style={{ left: "0", top: "0", zIndex: "2" }}
             />
           </div>
+        </div>
+
+        <div
+          style={{
+            position: "absolute",
+            top: this.state.windowHeight - 100 + "px",
+            left: 1 + "px"
+          }}
+        >
+          <button
+            onClick={() => this.handleSubmit("left")}
+            disabled={this.props.amIMovingInBattlefield}
+          >
+            Left
+          </button>
+          <button
+            onClick={() => this.handleSubmit("right")}
+            disabled={this.props.amIMovingInBattlefield}
+          >
+            Right
+          </button>
+          <button
+            onClick={() => this.handleSubmit("up")}
+            disabled={this.props.amIMovingInBattlefield}
+          >
+            Up
+          </button>
+          <button
+            onClick={() => this.handleSubmit("down")}
+            disabled={this.props.amIMovingInBattlefield}
+          >
+            Down
+          </button>
         </div>
 
         <div
@@ -223,6 +314,7 @@ const mapStateToProps = state => {
     message: state.party.message,
     socket: state.signIn.socket,
     field: state.battlefield.field,
+    amIMovingInBattlefield: state.battlefield.amIMovingInBattlefield,
     redirectToBattlefield: state.battlefield.redirectToBattlefield,
     battlefieldData: state.battlefield.battlefieldData
   };

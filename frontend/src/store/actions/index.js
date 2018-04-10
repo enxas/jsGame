@@ -13,5 +13,6 @@ export {
   leaderEnteredBattlefield,
   redirectedToBattlefield,
   playerEnteredBattlefield,
-  playerLeftBattlefield
+  playerLeftBattlefield,
+  movedInBattlefield
 } from "./battlefield";

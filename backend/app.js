@@ -80,7 +80,17 @@ io.on("connection", socket => {
     utils_battlefield.disconnectFromBattlefield(socket, callback);
   });
   
+  socket.on("movedInBattlefield", (directionMoved) => {
+    const callback = data => {
+      io.to(data.partyId).emit("onMovedInBattlefield", {
+        userId: data.userId,
+        directionMoved: data.directionMoved
+      });
+    };
 
+    utils_battlefield.movedInBattlefield(socket, callback, directionMoved);
+  });
+  
 
   // on disconnect
   socket.on("disconnect", function() {

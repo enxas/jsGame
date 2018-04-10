@@ -5,8 +5,8 @@ import * as actions from "../../../store/actions/index";
 
 class Signin extends Component {
   state = {
-    email: "",
-    password: ""
+    email: "a",
+    password: "123456"
   };
 
   handleInputChange = event => {

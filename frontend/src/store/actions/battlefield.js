@@ -79,4 +79,38 @@ export const playerLeftBattlefield = data => {
 };
 
 /////////////////////////////////////////////////////
+export const setMovedInBattlefield = data => {
+  return {
+    type: actionTypes.PLAYER_MOVED_IN_BATTLEFIELD,
+    movementData: data
+  };
+};
+
+export const movedInBattlefield = data => {
+  return dispatch => {
+    var i = 0;
+    function movementFunc() {
+      if (data.directionMoved === "up") {
+        data.y = (Math.round((parseFloat(data.y) - 0.2) * 10) / 10).toFixed(1); //Math.ceil(data.y - 0.2);
+      } else if (data.directionMoved === "down") {
+        data.y = (Math.round((parseFloat(data.y) + 0.2) * 10) / 10).toFixed(1); //Math.ceil(data.y + 0.2);
+      } else if (data.directionMoved === "left") {
+        data.x = (Math.round((parseFloat(data.x) - 0.2) * 10) / 10).toFixed(1); //Math.ceil(data.x - 0.2);
+      } else if (data.directionMoved === "right") {
+        data.x = (Math.round((parseFloat(data.x) + 0.2) * 10) / 10).toFixed(1); //Math.ceil(data.x + 0.2);
+      }
+      data.stillMoving = true;
+
+      i++;
+      if (i == 5) {
+        clearInterval(interval);
+        data.stillMoving = false;
+      }
+      console.log("tick " + i);
+      dispatch(setMovedInBattlefield(data));
+    }
+    var interval = setInterval(movementFunc, 200);
+    movementFunc();
+  };
+};
 /////////////////////////////////////////////////////

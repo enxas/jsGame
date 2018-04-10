@@ -5,7 +5,8 @@ const initialState = {
   error: null,
   message: null,
   battlefieldData: null,
-  redirectToBattlefield: false
+  redirectToBattlefield: false,
+  amIMovingInBattlefield: false
 };
 
 const reducer = (state = initialState, action) => {
@@ -70,6 +71,39 @@ const reducer = (state = initialState, action) => {
           actors: {
             ...state.battlefieldData.actors,
             players: newPlayersObject2
+          }
+        }
+      };
+    case actionTypes.PLAYER_MOVED_IN_BATTLEFIELD:
+      let amIMovingInBattlefield = false;
+      if (
+        action.movementData.stillMoving === true &&
+        action.movementData.isItMeMoving === true
+      ) {
+        amIMovingInBattlefield = true;
+      }
+      console.log(
+        `stillMoving: ${action.movementData.stillMoving} isItMeMoving: ${
+          action.movementData.isItMeMoving
+        } amIMovingInBattlefield: ${amIMovingInBattlefield}`
+      );
+      return {
+        ...state,
+        amIMovingInBattlefield: amIMovingInBattlefield,
+        battlefieldData: {
+          ...state.battlefieldData,
+          actors: {
+            ...state.battlefieldData.actors,
+            players: {
+              ...state.battlefieldData.actors.players,
+              [action.movementData.userId]: {
+                ...state.battlefieldData.actors.players[
+                  action.movementData.userId
+                ],
+                x: parseFloat(action.movementData.x),
+                y: parseFloat(action.movementData.y)
+              }
+            }
           }
         }
       };
