@@ -81,7 +81,7 @@ export const playerLeftBattlefield = data => {
 /////////////////////////////////////////////////////
 export const setMovedInBattlefield = data => {
   return {
-    type: actionTypes.PLAYER_MOVED_IN_BATTLEFIELD,
+    type: actionTypes.ACTOR_MOVED_IN_BATTLEFIELD,
     movementData: data
   };
 };

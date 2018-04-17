@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const PartyMember = require("../models/partyMember");
 const Battlefield = require("../models/battlefield");
+const enemyActions = require("./enemyActions");
 
 exports.connectToBattlefield = (socket, callback) => {
   PartyMember.findOne({ userId: socket.userId })
@@ -48,6 +49,8 @@ exports.movedInBattlefield = (socket, callback, directionMoved) => {
       .exec()
       .then(bfInfo => {
 
+        if (bfInfo.actors.players[socket.userId].isEndedTurn === false) {
+
         let axis;
         let newValue;
 
@@ -83,6 +86,60 @@ exports.movedInBattlefield = (socket, callback, directionMoved) => {
         partyId: member.partyId,
         userId: socket.userId,
         directionMoved: directionMoved.direction,
+      });
+    } // end of if (isEndedTurn)
+
+
+      }).catch(err => {
+        console.log(err);
+        return callback({
+          message: err,
+          error: true
+        });
+      });
+
+    })
+    .catch(err => {
+      console.log(err);
+      return callback({
+        message: err,
+        error: true
+      });
+    });
+};
+
+
+exports.playerEndedTurn = (socket, callback, io) => {
+  PartyMember.findOne({ userId: socket.userId })
+    .exec()
+    .then(member => {
+
+      Battlefield.findOne({ partyId: member.partyId })
+      .exec()
+      .then(bfInfo => {
+
+        const playersKey = 'actors.players.'+ socket.userId + '.isEndedTurn';
+
+        Battlefield.update({partyId: member.partyId}, {'$set': {
+          [playersKey]: false // TODO: change to true
+        }}, function (err, success) {
+          if (err) {
+           
+          } else {
+         
+          }
+      });
+
+      // enemyActions.makeTurn(member.partyId, 10).then((sum) => {
+      //   console.log(sum);
+      // });
+      enemyActions.makeTurn(member.partyId, io);
+     
+
+
+      return callback({
+        partyId: member.partyId,
+        userId: socket.userId
       });
 
 

@@ -99,33 +99,51 @@ class Layout extends Component {
         );
       });
 
-      socket.on("onMovedInBattlefield", data => {
+      socket.on("onActorMovedInBattlefield", data => {
         toastr.options = {
           closeButton: true,
           progressBar: true
         };
         toastr.info(
-          "Player " + data.userId + " moved " + data.directionMoved + "!",
+          "Actor " + data.actorId + " moved " + data.directionMoved + "!",
           "Party"
         );
-        console.log(`USER ID: ${this.props.userId} USER ID: ${data.userId}`);
-        if (data.userId === this.props.userId) {
+
+        if (data.actorId === this.props.userId) {
           console.log(`USER ID ARE EQUAL`);
           data.isItMeMoving = true;
         } else {
           data.isItMeMoving = false;
         }
-        data.x = this.props.battlefieldData.actors.players[data.userId].x;
-        data.y = this.props.battlefieldData.actors.players[data.userId].y;
 
+        if (data.whoMoved === "player") {
+          data.x = this.props.battlefieldData.actors.players[data.actorId].x;
+          data.y = this.props.battlefieldData.actors.players[data.actorId].y;
+        } else if (data.whoMoved === "enemy") {
+          data.x = this.props.battlefieldData.actors.enemies[data.actorId].x;
+          data.y = this.props.battlefieldData.actors.enemies[data.actorId].y;
+        }
+
+        console.log("--------------");
+        console.log(data);
         this.props.onMovedInBattlefield(data);
         console.log(
-          "[Layout.js]  Player " +
-            data.userId +
+          "[Layout.js]  Actor " +
+            data.actorId +
             " moved " +
             data.directionMoved +
             "!"
         );
+      });
+
+      socket.on("onPlayerEndedTurn", data => {
+        toastr.options = {
+          closeButton: true,
+          progressBar: true
+        };
+        toastr.info("Player " + data.userId + " ended turn!", "Party");
+
+        console.log("[Layout.js] Player " + data.userId + " ended turn!");
       });
 
       // socket.on("getMapData", data => {

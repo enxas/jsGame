@@ -74,7 +74,8 @@ const reducer = (state = initialState, action) => {
           }
         }
       };
-    case actionTypes.PLAYER_MOVED_IN_BATTLEFIELD:
+
+    case actionTypes.ACTOR_MOVED_IN_BATTLEFIELD:
       let amIMovingInBattlefield = false;
       if (
         action.movementData.stillMoving === true &&
@@ -82,31 +83,63 @@ const reducer = (state = initialState, action) => {
       ) {
         amIMovingInBattlefield = true;
       }
-      console.log(
-        `stillMoving: ${action.movementData.stillMoving} isItMeMoving: ${
-          action.movementData.isItMeMoving
-        } amIMovingInBattlefield: ${amIMovingInBattlefield}`
-      );
-      return {
-        ...state,
-        amIMovingInBattlefield: amIMovingInBattlefield,
-        battlefieldData: {
-          ...state.battlefieldData,
-          actors: {
-            ...state.battlefieldData.actors,
-            players: {
-              ...state.battlefieldData.actors.players,
-              [action.movementData.userId]: {
-                ...state.battlefieldData.actors.players[
-                  action.movementData.userId
-                ],
-                x: parseFloat(action.movementData.x),
-                y: parseFloat(action.movementData.y)
+
+      if (action.movementData.whoMoved === "player") {
+        return {
+          ...state,
+          amIMovingInBattlefield: amIMovingInBattlefield,
+          battlefieldData: {
+            ...state.battlefieldData,
+            actors: {
+              ...state.battlefieldData.actors,
+              players: {
+                ...state.battlefieldData.actors.players,
+                [action.movementData.actorId]: {
+                  ...state.battlefieldData.actors.players[
+                    action.movementData.actorId
+                  ],
+                  x: parseFloat(action.movementData.x),
+                  y: parseFloat(action.movementData.y)
+                }
               }
             }
           }
-        }
-      };
+        };
+      }
+
+      if (action.movementData.whoMoved === "enemy") {
+        return {
+          ...state,
+          amIMovingInBattlefield: amIMovingInBattlefield,
+          battlefieldData: {
+            ...state.battlefieldData,
+            actors: {
+              ...state.battlefieldData.actors,
+              enemies: {
+                ...state.battlefieldData.actors.enemies,
+                [action.movementData.actorId]: {
+                  ...state.battlefieldData.actors.enemies[
+                    action.movementData.actorId
+                  ],
+                  x: parseFloat(action.movementData.x),
+                  y: parseFloat(action.movementData.y)
+                }
+              }
+            }
+          }
+        };
+      }
+
+    // {
+    //   ...state.battlefieldData.actors.players,
+    //   [action.movementData.userId]: {
+    //     ...state.battlefieldData.actors.players[
+    //       action.movementData.userId
+    //     ],
+    //     x: parseFloat(action.movementData.x),
+    //     y: parseFloat(action.movementData.y)
+    //   }
+    // }
 
     default:
       return state;

@@ -82,13 +82,24 @@ io.on("connection", socket => {
   
   socket.on("movedInBattlefield", (directionMoved) => {
     const callback = data => {
-      io.to(data.partyId).emit("onMovedInBattlefield", {
-        userId: data.userId,
-        directionMoved: data.directionMoved
+      io.to(data.partyId).emit("onActorMovedInBattlefield", {
+        actorId: data.userId,
+        directionMoved: data.directionMoved,
+        whoMoved: 'player'
       });
     };
 
     utils_battlefield.movedInBattlefield(socket, callback, directionMoved);
+  });
+
+  socket.on("endedTurn", () => {
+    const callback = data => {
+      io.to(data.partyId).emit("onPlayerEndedTurn", {
+        userId: data.userId
+      });
+    };
+
+    utils_battlefield.playerEndedTurn(socket, callback, io);
   });
   
 

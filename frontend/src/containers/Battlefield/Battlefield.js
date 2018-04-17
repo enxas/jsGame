@@ -7,7 +7,7 @@ class Battlefield extends Component {
     windowHeight: 0,
     allLoadedImages: null
   };
-
+  // requestAnimationFrame();
   drawField(fieldArr) {
     const componentTHIS = this;
 
@@ -32,6 +32,7 @@ class Battlefield extends Component {
 
     ///////////////////////////////////////////
     const ground = ["0", "1", "player", "enemy"];
+    // 0 => grass, 1 => rock
     var tiles = ground; // getUniqueArray(ground) ["0", "1", "3"]
 
     var promiseOfAllImages = function(tiles) {
@@ -56,19 +57,10 @@ class Battlefield extends Component {
       console.log("All images are loaded!", allImages); // [Img, Img, Img]
       componentTHIS.state.allLoadedImages = allImages;
       draw(tiles, allImages, ground);
-
-      // draw enemies
-      for (let enemyId in componentTHIS.props.battlefieldData.actors.enemies) {
-        componentTHIS.drawLayer2(
-          componentTHIS.state.allLoadedImages,
-          componentTHIS.props.battlefieldData.actors.enemies[enemyId].x,
-          componentTHIS.props.battlefieldData.actors.enemies[enemyId].y,
-          3
-        );
-      }
     });
 
     function draw(tiles, images, ground) {
+      console.log(fieldArr);
       var tileW = 32;
       var tileH = 32;
       for (var x = 0; x < worldWidth; x++) {
@@ -104,10 +96,9 @@ class Battlefield extends Component {
     var tileH = 32;
 
     setInterval(function() {
-      // ctx2.fillStyle = "rgba(255, 255, 255, 0.5)";
-      // ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
       ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
 
+      // draw players
       for (let playerId in globalTHIS.props.battlefieldData.actors.players) {
         if (
           globalTHIS.props.battlefieldData.actors.players[playerId]
@@ -120,6 +111,15 @@ class Battlefield extends Component {
           );
         }
       }
+
+      // draw enemies
+      for (let enemyId in globalTHIS.props.battlefieldData.actors.enemies) {
+        ctx2.drawImage(
+          globalTHIS.state.allLoadedImages[3],
+          globalTHIS.props.battlefieldData.actors.enemies[enemyId].x * tileW,
+          globalTHIS.props.battlefieldData.actors.enemies[enemyId].y * tileH
+        );
+      }
     }, 200);
   }
 
@@ -130,59 +130,9 @@ class Battlefield extends Component {
     this.layer2Loop();
   }
 
-  // componentWillReceiveProps(nextProps) {
-  //   if (nextProps.redirectToBattlefield === true) {
-  //     this.props.onRedirectedToBattlefield();
-  //   }
-  // }
   componentWillUnmount() {
     this.props.socket.emit("disconnectedFromBattlefield");
   }
-
-  // componentWillUpdate(nextProps) {
-  // for (let playerId in this.props.battlefieldData.actors.players) {
-  //   if (
-  //     this.props.battlefieldData.actors.players[playerId].isConnected !==
-  //     nextProps.battlefieldData.actors.players[playerId].isConnected
-  //   ) {
-  //     console.log(
-  //       `[Battlefield.js] Player connected/disconnected from a battlefield`
-  //     );
-  //     if (
-  //       nextProps.battlefieldData.actors.players[playerId].isConnected ===
-  //       true
-  //     ) {
-  //       console.log(
-  //         `Drawing Player sprite at x: ${
-  //           this.props.battlefieldData.actors.players[playerId].x
-  //         }, y: ${this.props.battlefieldData.actors.players[playerId].y}`
-  //       );
-  //       this.drawLayer2(
-  //         this.state.allLoadedImages,
-  //         this.props.battlefieldData.actors.players[playerId].x,
-  //         this.props.battlefieldData.actors.players[playerId].y,
-  //         2
-  //       );
-  //     }
-  //     if (
-  //       nextProps.battlefieldData.actors.players[playerId].isConnected ===
-  //       false
-  //     ) {
-  //       console.log(
-  //         `Drawing Grass sprite at x: ${
-  //           this.props.battlefieldData.actors.players[playerId].x
-  //         }, y: ${this.props.battlefieldData.actors.players[playerId].y}`
-  //       );
-  //       this.drawLayer2(
-  //         this.state.allLoadedImages,
-  //         this.props.battlefieldData.actors.players[playerId].x,
-  //         this.props.battlefieldData.actors.players[playerId].y,
-  //         0
-  //       );
-  //     }
-  //   }
-  // }
-  // }
 
   drawLayer2(images, x, y, spriteId) {
     const worldWidth = 25;
@@ -208,19 +158,18 @@ class Battlefield extends Component {
     ctx2.drawImage(images[spriteId], x * tileW, y * tileH);
   }
 
-  handleSubmit = moveDirection => {
+  handleMoveButtonPress = moveDirection => {
     console.log(`moved ${moveDirection}`);
 
     this.props.socket.emit("movedInBattlefield", {
       direction: moveDirection
     });
+  };
 
-    // this.props.onSignIn(this.state.email, this.state.password);
+  handleTurnEnding = () => {
+    console.log(`pressed end turn`);
 
-    // this.setState(() => ({
-    //   isButtonLoading: ["button", "is-success"],
-    //   isAuthenticated: true
-    // }));
+    this.props.socket.emit("endedTurn");
   };
 
   render() {
@@ -253,29 +202,30 @@ class Battlefield extends Component {
           }}
         >
           <button
-            onClick={() => this.handleSubmit("left")}
+            onClick={() => this.handleMoveButtonPress("left")}
             disabled={this.props.amIMovingInBattlefield}
           >
             Left
           </button>
           <button
-            onClick={() => this.handleSubmit("right")}
+            onClick={() => this.handleMoveButtonPress("right")}
             disabled={this.props.amIMovingInBattlefield}
           >
             Right
           </button>
           <button
-            onClick={() => this.handleSubmit("up")}
+            onClick={() => this.handleMoveButtonPress("up")}
             disabled={this.props.amIMovingInBattlefield}
           >
             Up
           </button>
           <button
-            onClick={() => this.handleSubmit("down")}
+            onClick={() => this.handleMoveButtonPress("down")}
             disabled={this.props.amIMovingInBattlefield}
           >
             Down
           </button>
+          <button onClick={() => this.handleTurnEnding()}>END TURN</button>
         </div>
 
         <div
