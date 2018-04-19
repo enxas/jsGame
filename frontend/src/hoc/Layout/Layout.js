@@ -109,6 +109,8 @@ class Layout extends Component {
           "Party"
         );
 
+        if (data.directionMoved !== 'stay') {
+
         if (data.actorId === this.props.userId) {
           console.log(`USER ID ARE EQUAL`);
           data.isItMeMoving = true;
@@ -127,6 +129,7 @@ class Layout extends Component {
         console.log("--------------");
         console.log(data);
         this.props.onMovedInBattlefield(data);
+      } 
         console.log(
           "[Layout.js]  Actor " +
             data.actorId +

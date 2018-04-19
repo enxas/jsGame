@@ -43,6 +43,12 @@ async function makeTurn (partyId, io) {
 
 
   for (let enemy in bfInfo.actors.enemies) {
+
+   
+ 
+
+
+
     let worldIntermediate = [];
     worldIntermediate = JSON.parse(JSON.stringify(floor1.mapLayout));
 
@@ -53,12 +59,12 @@ async function makeTurn (partyId, io) {
         }
       }
      
-        // adds collision between enemy and other players (not target)
-        // for (let k in Player.list) {
-        //     if (Enemy.list[i].target !== Player.list[k].username){
-        //         worldIntermediate[Player.list[k].y][Player.list[k].x] = 3;
-        //     }
-        // }
+       // adds collision between current enemy and other players (not target)
+        for (let player2 in bfInfo.actors.players) {
+            if (bfInfo.actors.enemies[enemy].target !== player2){
+                worldIntermediate[bfInfo.actors.players[player2].y][bfInfo.actors.players[player2].x] = 3;
+            }
+        }
         //=================
 
 
@@ -70,7 +76,9 @@ async function makeTurn (partyId, io) {
         let pathStart = [bfInfo.actors.enemies[enemy].x,bfInfo.actors.enemies[enemy].y];
        // console.log(`pathStart:`);
       //  console.log(pathStart);
-        let pathEnd = [4,10];
+      console.log(`enemies target: ${bfInfo.actors.enemies[enemy].target}`);
+      console.log(bfInfo.actors.players);
+        let pathEnd = [bfInfo.actors.players[bfInfo.actors.enemies[enemy].target].x,bfInfo.actors.players[bfInfo.actors.enemies[enemy].target].y];
     
         let currentPath = aStar.findPath(worldReformed,pathStart,pathEnd);
        // console.log(`currentPath:`);
@@ -112,10 +120,10 @@ async function makeTurn (partyId, io) {
 
            
                 console.log(`${enemy} x,y: [${bfInfo.actors.enemies[enemy].x},${bfInfo.actors.enemies[enemy].y}], x2y2: [${currentPath[1][0]},${currentPath[1][1]}]`);
-                console.log('currentPath:');
-                console.log(currentPath);
-                console.log('worldReformed:');
-                console.log(worldReformed);
+               // console.log('currentPath:');
+              //  console.log(currentPath);
+               // console.log('worldReformed:');
+               // console.log(worldReformed);
 
                 io.to(partyId).emit("onActorMovedInBattlefield", {
                   actorId: enemy,
@@ -138,8 +146,34 @@ async function makeTurn (partyId, io) {
 });
 
   i++;
-  if (i == 40) {
+  if (i == 6) {
     clearInterval(interval);
+
+    // after enemies stopped moving set all players .isEndedTurn to false so they can move
+    Battlefield.findOne({ partyId: partyId })
+    .exec()
+    .then(bfInfo => {
+    for (let player3 in bfInfo.actors.players) {
+
+      const playersKey = 'actors.players.'+ player3 + '.isEndedTurn';
+      Battlefield.update({partyId: partyId}, {'$set': {
+        [playersKey]: false
+      }}, function (err, success) {
+        if (err) {
+         console.log('Error occurred in a enemyActions.js makeTurn() method (5)');
+        console.log(err);
+        } else {
+
+
+        }
+      });
+    }
+    }).catch(err => {
+      console.log('Error occurred in a enemyActions.js makeTurn() method (6)');
+      console.log(err);
+     
+    });
+
   }
   console.log('---------------------');
   console.log("TICK " + i);

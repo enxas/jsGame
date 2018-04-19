@@ -197,7 +197,7 @@ class Battlefield extends Component {
         <div
           style={{
             position: "absolute",
-            top: this.state.windowHeight - 100 + "px",
+            top: 570 + "px",
             left: 1 + "px"
           }}
         >
@@ -231,7 +231,7 @@ class Battlefield extends Component {
         <div
           style={{
             position: "absolute",
-            top: this.state.windowHeight + "px",
+            top: 600 + "px",
             left: 1 + "px"
           }}
         >

@@ -64,7 +64,8 @@ exports.mapData = (req, res, next) => {
           enemiesObj[enemies.id] = {
             health: enemies.health,
             x: enemies.x,
-            y: enemies.y+index
+            y: enemies.y+index,
+            target: null
           };
         });
 
