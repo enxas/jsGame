@@ -99,45 +99,45 @@ class Layout extends Component {
         );
       });
 
-      socket.on("onActorMovedInBattlefield", data => {
-        toastr.options = {
-          closeButton: true,
-          progressBar: true
-        };
-        toastr.info(
-          "Actor " + data.actorId + " moved " + data.directionMoved + "!",
-          "Party"
-        );
+      // socket.on("onActorMovedInBattlefield", data => {
+      //   toastr.options = {
+      //     closeButton: true,
+      //     progressBar: true
+      //   };
+      //   toastr.info(
+      //     "Actor " + data.actorId + " moved " + data.directionMoved + "!",
+      //     "Party"
+      //   );
 
-        if (data.directionMoved !== 'stay') {
+      //   if (data.directionMoved !== 'stay') {
 
-        if (data.actorId === this.props.userId) {
-          console.log(`USER ID ARE EQUAL`);
-          data.isItMeMoving = true;
-        } else {
-          data.isItMeMoving = false;
-        }
+      //   if (data.actorId === this.props.userId) {
+      //     console.log(`USER ID ARE EQUAL`);
+      //     data.isItMeMoving = true;
+      //   } else {
+      //     data.isItMeMoving = false;
+      //   }
 
-        if (data.whoMoved === "player") {
-          data.x = this.props.battlefieldData.actors.players[data.actorId].x;
-          data.y = this.props.battlefieldData.actors.players[data.actorId].y;
-        } else if (data.whoMoved === "enemy") {
-          data.x = this.props.battlefieldData.actors.enemies[data.actorId].x;
-          data.y = this.props.battlefieldData.actors.enemies[data.actorId].y;
-        }
+      //   if (data.whoMoved === "player") {
+      //     data.x = this.props.battlefieldData.actors.players[data.actorId].x;
+      //     data.y = this.props.battlefieldData.actors.players[data.actorId].y;
+      //   } else if (data.whoMoved === "enemy") {
+      //     data.x = this.props.battlefieldData.actors.enemies[data.actorId].x;
+      //     data.y = this.props.battlefieldData.actors.enemies[data.actorId].y;
+      //   }
 
-        console.log("--------------");
-        console.log(data);
-        this.props.onMovedInBattlefield(data);
-      } 
-        console.log(
-          "[Layout.js]  Actor " +
-            data.actorId +
-            " moved " +
-            data.directionMoved +
-            "!"
-        );
-      });
+      //   console.log("--------------");
+      //   console.log(data);
+      //   this.props.onMovedInBattlefield(data);
+      // } 
+      //   console.log(
+      //     "[Layout.js]  Actor " +
+      //       data.actorId +
+      //       " moved " +
+      //       data.directionMoved +
+      //       "!"
+      //   );
+      // });
 
       socket.on("onPlayerEndedTurn", data => {
         toastr.options = {

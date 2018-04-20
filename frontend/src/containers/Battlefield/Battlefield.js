@@ -3,9 +3,15 @@ import { connect } from "react-redux";
 import * as actions from "../../store/actions/index";
 
 class Battlefield extends Component {
+  constructor(props) {
+    super(props);
+    this.chatboxRef = React.createRef();
+  }
+
   state = {
     windowHeight: 0,
-    allLoadedImages: null
+    allLoadedImages: null,
+    chat: ["Welcome and Thank You for playing!"]
   };
   // requestAnimationFrame();
   drawField(fieldArr) {
@@ -125,6 +131,39 @@ class Battlefield extends Component {
 
   componentDidMount() {
     console.log(` Battlefield.js componentDidMount`);
+
+    this.props.socket.on("onActorMovedInBattlefield", data => {
+      if (data.directionMoved !== "stay") {
+        if (data.actorId === this.props.userId) {
+          console.log(`USER ID ARE EQUAL`);
+          data.isItMeMoving = true;
+        } else {
+          data.isItMeMoving = false;
+        }
+
+        if (data.whoMoved === "player") {
+          data.x = this.props.battlefieldData.actors.players[data.actorId].x;
+          data.y = this.props.battlefieldData.actors.players[data.actorId].y;
+        } else if (data.whoMoved === "enemy") {
+          data.x = this.props.battlefieldData.actors.enemies[data.actorId].x;
+          data.y = this.props.battlefieldData.actors.enemies[data.actorId].y;
+        }
+
+        this.props.onMovedInBattlefield(data);
+      }
+      let addedToChat = [
+        ...this.state.chat,
+        "Actor " + data.actorId + " moved " + data.directionMoved + "!"
+      ];
+
+      this.setState(() => ({
+        chat: addedToChat
+      }));
+
+      // make chat scroll
+      this.chatboxRef.current.scrollTop = 999999;
+    });
+
     this.props.onRedirectedToBattlefield();
     this.drawField(this.props.field);
     this.layer2Loop();
@@ -132,6 +171,7 @@ class Battlefield extends Component {
 
   componentWillUnmount() {
     this.props.socket.emit("disconnectedFromBattlefield");
+    this.props.socket.off("onActorMovedInBattlefield");
   }
 
   drawLayer2(images, x, y, spriteId) {
@@ -236,14 +276,17 @@ class Battlefield extends Component {
           }}
         >
           <div
+            ref={this.chatboxRef}
             id="chat-text"
             style={{
               width: 500 + "px",
               height: 100 + "px",
-              overflowY: "scroll"
+              overflow: "auto"
             }}
           >
-            <div>Hello!</div>
+            {this.state.chat.map((object, i) => {
+              return <div key={i}>{object}</div>;
+            })}
           </div>
 
           <form id="chat-form">
@@ -259,6 +302,7 @@ class Battlefield extends Component {
 
 const mapStateToProps = state => {
   return {
+    userId: state.signIn.userId,
     loading: state.party.loading,
     error: state.party.error,
     message: state.party.message,
@@ -272,7 +316,9 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onRedirectedToBattlefield: () => dispatch(actions.redirectedToBattlefield())
+    onRedirectedToBattlefield: () =>
+      dispatch(actions.redirectedToBattlefield()),
+    onMovedInBattlefield: data => dispatch(actions.movedInBattlefield(data))
   };
 };
 
