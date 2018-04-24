@@ -12,7 +12,17 @@ class Battlefield extends Component {
   state = {
     windowHeight: 0,
     allLoadedImages: null,
-    chat: ["Welcome and Thank You for playing!"]
+    chat: ["Welcome and Thank You for playing!"],
+    info: {
+      name: "",
+      hpLeft: 0,
+      hpFull: 0,
+      attack: "",
+      defence: "",
+      positionX: 0,
+      positionY: 0,
+      canAttack: false
+    }
   };
   // requestAnimationFrame();
   drawField(fieldArr) {
@@ -213,13 +223,86 @@ class Battlefield extends Component {
     this.props.socket.emit("endedTurn");
   };
 
+  handleCanvas2Click = e => {
+    let x, y;
+    const canvas2 = this.refs.canvas2;
+
+    let canvas2_rect = canvas2.getBoundingClientRect();
+    x =
+      (e.clientX - canvas2_rect.left) /
+      (canvas2_rect.right - canvas2_rect.left) *
+      canvas2.width;
+    y =
+      (e.clientY - canvas2_rect.top) /
+      (canvas2_rect.bottom - canvas2_rect.top) *
+      canvas2.height;
+
+    // return tile x,y that we clicked
+    var cell = [Math.floor(x / 32), Math.floor(y / 32)];
+
+    let updateInfoState = {
+      name: "",
+      hpLeft: 0,
+      hpFull: 0,
+      attack: "",
+      defence: "",
+      positionX: cell[0],
+      positionY: cell[1],
+      canAttack: false
+    };
+
+    for (let player in this.props.battlefieldData.actors.players) {
+      if (
+        this.props.battlefieldData.actors.players[player].x == cell[0] &&
+        this.props.battlefieldData.actors.players[player].y == cell[1]
+      ) {
+        updateInfoState = {
+          name: player,
+          hpLeft: this.props.battlefieldData.actors.players[player].hpLeft,
+          hpFull: this.props.battlefieldData.actors.players[player].hpFull,
+          attack: this.props.battlefieldData.actors.players[player].attack,
+          defence: this.props.battlefieldData.actors.players[player].defence,
+          positionX: this.props.battlefieldData.actors.players[player].x,
+          positionY: this.props.battlefieldData.actors.players[player].y,
+          canAttack: false
+        };
+      }
+    }
+
+    for (let enemy in this.props.battlefieldData.actors.enemies) {
+      if (
+        this.props.battlefieldData.actors.enemies[enemy].x == cell[0] &&
+        this.props.battlefieldData.actors.enemies[enemy].y == cell[1]
+      ) {
+        updateInfoState = {
+          name: enemy,
+          hpLeft: this.props.battlefieldData.actors.enemies[enemy].hpLeft,
+          hpFull: this.props.battlefieldData.actors.enemies[enemy].hpFull,
+          attack: this.props.battlefieldData.actors.enemies[enemy].attack,
+          defence: this.props.battlefieldData.actors.enemies[enemy].defence,
+          positionX: this.props.battlefieldData.actors.enemies[enemy].x,
+          positionY: this.props.battlefieldData.actors.enemies[enemy].y,
+          canAttack: true
+        };
+      }
+    }
+
+    this.setState(() => ({
+      info: updateInfoState
+    }));
+  };
+
   render() {
     return (
       <div className="my-flex-row">
         <div className="field_side">
           <div className="canvas_wrapper" style={{ height: 520 + "px" }}>
             <canvas ref="canvas1" style={{ width: "640", height: "360" }} />
-            <canvas ref="canvas2" style={{ width: "640", height: "360" }} />
+            <canvas
+              ref="canvas2"
+              onClick={e => this.handleCanvas2Click(e)}
+              style={{ width: "640", height: "360" }}
+            />
           </div>
 
           <div>
@@ -440,35 +523,43 @@ class Battlefield extends Component {
                   <th style={{ textAlign: "left", fontWeight: "bold" }}>
                     Name
                   </th>
-                  <td style={{ textAlign: "left" }}>Ninja</td>
+                  <td style={{ textAlign: "left" }}>{this.state.info.name}</td>
                 </tr>
                 <tr>
                   <td style={{ textAlign: "left", fontWeight: "bold" }}>
                     Health
                   </td>
-                  <td style={{ textAlign: "left" }}>6 / 20</td>
+                  <td style={{ textAlign: "left" }}>
+                    {this.state.info.hpLeft} / {this.state.info.hpFull}
+                  </td>
                 </tr>
                 <tr>
                   <td style={{ textAlign: "left", fontWeight: "bold" }}>
                     Attack
                   </td>
-                  <td style={{ textAlign: "left" }}>12</td>
+                  <td style={{ textAlign: "left" }}>
+                    {this.state.info.attack}
+                  </td>
                 </tr>
                 <tr>
                   <td style={{ textAlign: "left", fontWeight: "bold" }}>
                     Defence
                   </td>
-                  <td style={{ textAlign: "left" }}>8</td>
+                  <td style={{ textAlign: "left" }}>
+                    {this.state.info.defence}
+                  </td>
                 </tr>
                 <tr>
                   <td style={{ textAlign: "left", fontWeight: "bold" }}>
                     Position
                   </td>
-                  <td style={{ textAlign: "left" }}>[ 5:8 ]</td>
+                  <td style={{ textAlign: "left" }}>
+                    [ {this.state.info.positionX}:{this.state.info.positionY} ]
+                  </td>
                 </tr>
               </tbody>
             </table>
-            <button>ATTACK</button>
+            {this.state.info.canAttack ? <button>ATTACK</button> : null}
           </div>
         </div>
       </div>
