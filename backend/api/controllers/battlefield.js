@@ -15,18 +15,24 @@ exports.mapData = (req, res, next) => {
       { 
           id:'orc1',
           health: 100,
+          attack: 11,
+          defence: 9,
           x: 19,
           y: 8
         
       },{ 
         id:'orc2',
           health: 100,
+          attack: 11,
+          defence: 9,
           x: 16,
           y: 4
         
       },{ 
         id:'orc3',
           health: 100,
+          attack: 11,
+          defence: 9,
           x: 14,
           y: 6
        
@@ -51,7 +57,10 @@ exports.mapData = (req, res, next) => {
         const playersObj = {};
         partymembers.map((member, index) => {
           playersObj[member.userId] = {
-            health: 100,
+            hpFull: 100,
+            hpLeft: 100,
+            attack: 12,
+            defence: 8,
             x: 3,
             y: 3+index,
             isConnected: false,
@@ -62,7 +71,10 @@ exports.mapData = (req, res, next) => {
         const enemiesObj = {};
         worldEnemies.map((enemies, index) => {
           enemiesObj[enemies.id] = {
-            health: enemies.health,
+            hpFull: enemies.health,
+            hpLeft: enemies.health,
+            attack: enemies.attack,
+            defence: enemies.defence,
             x: enemies.x,
             y: enemies.y+index,
             target: null
