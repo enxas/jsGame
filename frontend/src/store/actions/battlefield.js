@@ -102,7 +102,7 @@ export const movedInBattlefield = data => {
       data.stillMoving = true;
 
       i++;
-      if (i == 5) {
+      if (i === 5) {
         clearInterval(interval);
         data.stillMoving = false;
       }

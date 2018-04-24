@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import * as actions from "../../store/actions/index";
+import "../../assets/css/battlefield.css";
 
 class Battlefield extends Component {
   constructor(props) {
@@ -214,86 +215,261 @@ class Battlefield extends Component {
 
   render() {
     return (
-      <div>
-        <div className="container_row" style={{ position: "relative" }}>
-          <div className="layer1" style={{ position: "absolute" }}>
-            <canvas
-              ref="canvas1"
-              width={640}
-              height={360}
-              style={{ left: "0", top: "0", zIndex: "1" }}
-            />
+      <div className="my-flex-row">
+        <div className="field_side">
+          <div className="canvas_wrapper" style={{ height: 520 + "px" }}>
+            <canvas ref="canvas1" style={{ width: "640", height: "360" }} />
+            <canvas ref="canvas2" style={{ width: "640", height: "360" }} />
           </div>
-          <div className="layer2" style={{ position: "absolute" }}>
-            <canvas
-              ref="canvas2"
-              width={640}
-              height={360}
-              style={{ left: "0", top: "0", zIndex: "2" }}
-            />
+
+          <div>
+            <div
+              ref={this.chatboxRef}
+              style={{
+                width: 60 + "%",
+                height: 140 + "px",
+                overflow: "auto"
+              }}
+            >
+              {this.state.chat.map((object, i) => {
+                return <div key={i}>{object}</div>;
+              })}
+            </div>
+
+            <form id="chat-form">
+              <input id="chat-input" type="text" style={{ width: 60 + "%" }} />
+            </form>
           </div>
         </div>
-
-        <div
-          style={{
-            position: "absolute",
-            top: 570 + "px",
-            left: 1 + "px"
-          }}
-        >
-          <button
-            onClick={() => this.handleMoveButtonPress("left")}
-            disabled={this.props.amIMovingInBattlefield}
-          >
-            Left
-          </button>
-          <button
-            onClick={() => this.handleMoveButtonPress("right")}
-            disabled={this.props.amIMovingInBattlefield}
-          >
-            Right
-          </button>
-          <button
-            onClick={() => this.handleMoveButtonPress("up")}
-            disabled={this.props.amIMovingInBattlefield}
-          >
-            Up
-          </button>
-          <button
-            onClick={() => this.handleMoveButtonPress("down")}
-            disabled={this.props.amIMovingInBattlefield}
-          >
-            Down
-          </button>
-          <button onClick={() => this.handleTurnEnding()}>END TURN</button>
-        </div>
-
-        <div
-          style={{
-            position: "absolute",
-            top: 600 + "px",
-            left: 1 + "px"
-          }}
-        >
-          <div
-            ref={this.chatboxRef}
-            id="chat-text"
-            style={{
-              width: 500 + "px",
-              height: 100 + "px",
-              overflow: "auto"
-            }}
-          >
-            {this.state.chat.map((object, i) => {
-              return <div key={i}>{object}</div>;
-            })}
+        <div className="info_side">
+          <div>
+            <table style={{ width: 100 + "%" }}>
+              <thead>
+                <tr>
+                  <th
+                    colSpan="3"
+                    style={{
+                      backgroundColor: "black",
+                      color: "white",
+                      textAlign: "center"
+                    }}
+                  >
+                    Multipliers
+                  </th>
+                </tr>
+                <tr>
+                  <th style={{ textAlign: "center", backgroundColor: "#eee" }}>
+                    Player
+                  </th>
+                  <th style={{ textAlign: "center", backgroundColor: "#eee" }}>
+                    Enemy
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td
+                    style={{
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      fontSize: "1.5em"
+                    }}
+                  >
+                    4
+                  </td>
+                  <td
+                    style={{
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      fontSize: "1.5em"
+                    }}
+                  >
+                    6
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
-          <form id="chat-form">
-            <input id="chat-input" type="text" style={{ width: 500 + "px" }} />
-          </form>
+          <div>
+            <center>
+              <table style={{ width: 100 + "%" }}>
+                <thead>
+                  <tr>
+                    <th
+                      colSpan="3"
+                      style={{
+                        backgroundColor: "black",
+                        color: "white",
+                        textAlign: "center"
+                      }}
+                    >
+                      Navigation
+                    </th>
+                  </tr>
+                </thead>
+              </table>
+              <table style={{ width: 50 + "%" }}>
+                <tbody>
+                  <tr>
+                    <td
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.5em"
+                      }}
+                    />
+                    <td
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.5em"
+                      }}
+                    >
+                      <button
+                        onClick={() => this.handleMoveButtonPress("up")}
+                        disabled={this.props.amIMovingInBattlefield}
+                      >
+                        UP
+                      </button>
+                    </td>
+                    <td
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.5em"
+                      }}
+                    />
+                  </tr>
+                  <tr>
+                    <td
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.5em"
+                      }}
+                    >
+                      <button
+                        onClick={() => this.handleMoveButtonPress("left")}
+                        disabled={this.props.amIMovingInBattlefield}
+                      >
+                        LEFT
+                      </button>
+                    </td>
+                    <td
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.5em"
+                      }}
+                    />
+                    <td
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.5em"
+                      }}
+                    >
+                      <button
+                        onClick={() => this.handleMoveButtonPress("right")}
+                        disabled={this.props.amIMovingInBattlefield}
+                      >
+                        RIGHT
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.5em"
+                      }}
+                    />
+                    <td
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.5em"
+                      }}
+                    >
+                      <button
+                        onClick={() => this.handleMoveButtonPress("down")}
+                        disabled={this.props.amIMovingInBattlefield}
+                      >
+                        DOWN
+                      </button>
+                    </td>
+                    <td
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "1.5em"
+                      }}
+                    />
+                  </tr>
+                </tbody>
+              </table>
+            </center>
+            <button
+              onClick={() => this.handleTurnEnding()}
+              style={{ float: "right" }}
+            >
+              END TURN
+            </button>
+          </div>
 
-          <div id="dialog" title="Basic dialog" />
+          <div>
+            <table style={{ width: 100 + "%" }}>
+              <thead>
+                <tr>
+                  <th
+                    colSpan="3"
+                    style={{
+                      backgroundColor: "black",
+                      color: "white",
+                      textAlign: "center"
+                    }}
+                  >
+                    Information
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th style={{ textAlign: "left", fontWeight: "bold" }}>
+                    Name
+                  </th>
+                  <td style={{ textAlign: "left" }}>Ninja</td>
+                </tr>
+                <tr>
+                  <td style={{ textAlign: "left", fontWeight: "bold" }}>
+                    Health
+                  </td>
+                  <td style={{ textAlign: "left" }}>6 / 20</td>
+                </tr>
+                <tr>
+                  <td style={{ textAlign: "left", fontWeight: "bold" }}>
+                    Attack
+                  </td>
+                  <td style={{ textAlign: "left" }}>12</td>
+                </tr>
+                <tr>
+                  <td style={{ textAlign: "left", fontWeight: "bold" }}>
+                    Defence
+                  </td>
+                  <td style={{ textAlign: "left" }}>8</td>
+                </tr>
+                <tr>
+                  <td style={{ textAlign: "left", fontWeight: "bold" }}>
+                    Position
+                  </td>
+                  <td style={{ textAlign: "left" }}>[ 5:8 ]</td>
+                </tr>
+              </tbody>
+            </table>
+            <button>ATTACK</button>
+          </div>
         </div>
       </div>
     );

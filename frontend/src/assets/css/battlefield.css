@@ -1,0 +1,40 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.header {
+  text-align: center;
+  background: #1abc9c;
+  color: white;
+}
+
+.my-flex-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.field_side {
+  flex: 70%;
+  background-color: #f1f1f1;
+  padding: 20px;
+}
+
+.info_side {
+  flex: 30%;
+  background-color: white;
+  padding: 20px;
+}
+
+.canvas_wrapper {
+  position: relative;
+}
+
+.canvas_wrapper canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
