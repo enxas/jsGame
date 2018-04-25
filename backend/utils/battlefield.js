@@ -271,3 +271,58 @@ console.log(enemiesWithTargets);
       });
     });
 };
+
+exports.playerAttackedEnemy = (socket, callback, attacked) => {
+  PartyMember.findOne({ userId: socket.userId })
+  .exec()
+  .then(member => {
+
+    Battlefield.findOne({ partyId: member.partyId })
+    .exec()
+    .then(bfInfo => {
+
+    //   const playersKey = 'actors.players.'+ socket.userId + '.isEndedTurn';
+
+    //   Battlefield.update({partyId: member.partyId}, {'$set': {
+    //     [playersKey]: true // TODO: change to true
+    //   }}, function (err, success) {
+    //     if (err) {
+         
+    //     } else {
+ 
+
+    //     }
+    // });
+console.log(attacked)
+    const multipliers = [];
+    const min = -40;
+    const max = 40;
+
+    // player and enemy multiplier
+    multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
+    multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
+
+    return callback({
+      partyId: member.partyId,
+      userId: socket.userId,
+      multipliers: multipliers
+    });
+
+
+    }).catch(err => {
+      console.log(err);
+      return callback({
+        message: err,
+        error: true
+      });
+    });
+
+  })
+  .catch(err => {
+    console.log(err);
+    return callback({
+      message: err,
+      error: true
+    });
+  });
+};

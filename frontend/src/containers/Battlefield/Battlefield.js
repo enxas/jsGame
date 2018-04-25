@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import * as actions from "../../store/actions/index";
 import "../../assets/css/battlefield.css";
+import spinner from "../../assets/images/spinner.svg";
 
 class Battlefield extends Component {
   constructor(props) {
@@ -13,6 +14,9 @@ class Battlefield extends Component {
     windowHeight: 0,
     allLoadedImages: null,
     chat: ["Welcome and Thank You for playing!"],
+    playerMultipl: 0,
+    enemyMultipl: 0,
+    showSpinner: false,
     info: {
       name: "",
       hpLeft: 0,
@@ -48,7 +52,7 @@ class Battlefield extends Component {
     const ctx1 = canvas1.getContext("2d");
 
     ///////////////////////////////////////////
-    const ground = ["0", "1", "player", "enemy"];
+    const ground = ["0.png", "1.png", "player.png", "enemy.png"];
     // 0 => grass, 1 => rock
     var tiles = ground; // getUniqueArray(ground) ["0", "1", "3"]
 
@@ -59,7 +63,7 @@ class Battlefield extends Component {
           // Load each tile, and "resolve" when done
           return new Promise(function(resolve) {
             var img = new Image();
-            img.src = require(`../../assets/images/${t}.png`);
+            img.src = require(`../../assets/images/${t}`);
             // img.src = "../../assets/images/" + t + ".png";
             img.onload = function() {
               // Image has loaded... resolve the promise!
@@ -143,6 +147,52 @@ class Battlefield extends Component {
   componentDidMount() {
     console.log(` Battlefield.js componentDidMount`);
 
+    this.props.socket.on("onPlayerAttackedEnemy", data => {
+      let formattedPlayerMultipl, formattedEnemyMultipl;
+
+      if (data.userId === this.props.userId) {
+        if (data.multipliers[0] > 0) {
+          formattedPlayerMultipl = "+" + data.multipliers[0] + "%";
+        } else if (data.multipliers[0] < 0) {
+          formattedPlayerMultipl = data.multipliers[0] + "%";
+        } else {
+          formattedPlayerMultipl = data.multipliers[0] + "%";
+        }
+
+        if (data.multipliers[1] > 0) {
+          formattedEnemyMultipl = "+" + data.multipliers[1] + "%";
+        } else if (data.multipliers[1] < 0) {
+          formattedEnemyMultipl = data.multipliers[1] + "%";
+        } else {
+          formattedEnemyMultipl = data.multipliers[1] + "%";
+        }
+
+        this.setState(() => ({
+          playerMultipl: formattedPlayerMultipl,
+          enemyMultipl: formattedEnemyMultipl,
+          showSpinner: false
+        }));
+      }
+
+      let addedToChat = [
+        ...this.state.chat,
+        "Actor " +
+          data.userId +
+          " rolled " +
+          formattedPlayerMultipl +
+          " enemy rolled " +
+          formattedEnemyMultipl +
+          " !"
+      ];
+
+      this.setState(() => ({
+        chat: addedToChat
+      }));
+
+      // make chat scroll
+      this.chatboxRef.current.scrollTop = 999999;
+    });
+
     this.props.socket.on("onActorMovedInBattlefield", data => {
       if (data.directionMoved !== "stay") {
         if (data.actorId === this.props.userId) {
@@ -183,6 +233,7 @@ class Battlefield extends Component {
   componentWillUnmount() {
     this.props.socket.emit("disconnectedFromBattlefield");
     this.props.socket.off("onActorMovedInBattlefield");
+    this.props.socket.off("onPlayerAttackedEnemy");
   }
 
   drawLayer2(images, x, y, spriteId) {
@@ -292,7 +343,30 @@ class Battlefield extends Component {
     }));
   };
 
+  handleAttackEnemy = () => {
+    this.setState(() => ({
+      showSpinner: true
+    }));
+
+    // wait 500 ms before sending request and show spinner meanwhile
+    setTimeout(
+      function() {
+        this.props.socket.emit("playerAttackedEnemy", {
+          enemyId: this.state.info.name
+        });
+      }.bind(this),
+      500
+    );
+  };
+
   render() {
+    let playerMultiplierOrSpinner = this.state.playerMultipl;
+    let enemyMultiplierOrSpinner = this.state.enemyMultipl;
+    if (this.state.showSpinner) {
+      playerMultiplierOrSpinner = <img src={spinner} />;
+      enemyMultiplierOrSpinner = <img src={spinner} />;
+    }
+
     return (
       <div className="my-flex-row">
         <div className="field_side">
@@ -358,7 +432,7 @@ class Battlefield extends Component {
                       fontSize: "1.5em"
                     }}
                   >
-                    4
+                    {playerMultiplierOrSpinner}
                   </td>
                   <td
                     style={{
@@ -367,7 +441,7 @@ class Battlefield extends Component {
                       fontSize: "1.5em"
                     }}
                   >
-                    6
+                    {enemyMultiplierOrSpinner}
                   </td>
                 </tr>
               </tbody>
@@ -559,7 +633,9 @@ class Battlefield extends Component {
                 </tr>
               </tbody>
             </table>
-            {this.state.info.canAttack ? <button>ATTACK</button> : null}
+            {this.state.info.canAttack ? (
+              <button onClick={() => this.handleAttackEnemy()}>ATTACK</button>
+            ) : null}
           </div>
         </div>
       </div>

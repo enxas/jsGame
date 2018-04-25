@@ -101,6 +101,18 @@ io.on("connection", socket => {
 
     utils_battlefield.playerEndedTurn(socket, callback, io);
   });
+
+  socket.on("playerAttackedEnemy", (attacked) => {
+    const callback = data => {
+      io.to(data.partyId).emit("onPlayerAttackedEnemy", {
+        userId: data.userId,
+        multipliers: data.multipliers
+      });
+    };
+
+    utils_battlefield.playerAttackedEnemy(socket, callback, attacked);
+  });
+  
   
 
   // on disconnect
