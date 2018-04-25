@@ -188,8 +188,10 @@ exports.playerEndedTurn = (socket, callback, io) => {
 
     const enemiesWithTargets = {};
     let arrayOfAlivePlayersIds = [];
+   
+
     for (let player in bfInfo.actors.players) {
-      if (bfInfo.actors.players[player].health > 0) {
+      if (bfInfo.actors.players[player].hpLeft > 0) {
         arrayOfAlivePlayersIds.push(player);
       }
     }
@@ -202,7 +204,8 @@ exports.playerEndedTurn = (socket, callback, io) => {
     }
 
   }
-  console.log('enemiesWithTargets:');
+
+console.log('enemiesWithTargets:');
 console.log(enemiesWithTargets);
      // const enemyTarget = 'actors.enemies.'+ enemy + '.target';
       Battlefield.update({partyId: member.partyId}, {'$set': enemiesWithTargets
