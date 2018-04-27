@@ -85,7 +85,8 @@ io.on("connection", socket => {
       io.to(data.partyId).emit("onActorMovedInBattlefield", {
         actorId: data.userId,
         directionMoved: data.directionMoved,
-        whoMoved: 'player'
+        whoMoved: 'player',
+        actionPoints: data.actionPoints
       });
     };
 
@@ -95,7 +96,8 @@ io.on("connection", socket => {
   socket.on("endedTurn", () => {
     const callback = data => {
       io.to(data.partyId).emit("onPlayerEndedTurn", {
-        userId: data.userId
+        userId: data.userId,
+        actionPoints: data.actionPoints
       });
     };
 

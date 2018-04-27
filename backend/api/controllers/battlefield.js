@@ -18,15 +18,16 @@ exports.mapData = (req, res, next) => {
           attack: 11,
           defence: 9,
           x: 19,
-          y: 8
-        
+          y: 8,
+          actionPoints: 10
       },{ 
         id:'orc2',
           health: 100,
           attack: 11,
           defence: 9,
           x: 16,
-          y: 4
+          y: 4,
+          actionPoints: 10
         
       },{ 
         id:'orc3',
@@ -34,7 +35,8 @@ exports.mapData = (req, res, next) => {
           attack: 11,
           defence: 9,
           x: 14,
-          y: 6
+          y: 6,
+          actionPoints: 10
        
       }];
 
@@ -63,6 +65,7 @@ exports.mapData = (req, res, next) => {
             defence: 8,
             x: 3,
             y: 3+index,
+            actionPoints: 10,
             isConnected: false,
             isEndedTurn: false
           };
@@ -77,6 +80,7 @@ exports.mapData = (req, res, next) => {
             defence: enemies.defence,
             x: enemies.x,
             y: enemies.y+index,
+            actionPoints: enemies.actionPoints,
             target: null
           };
         });

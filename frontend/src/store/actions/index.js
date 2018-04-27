@@ -14,5 +14,6 @@ export {
   redirectedToBattlefield,
   playerEnteredBattlefield,
   playerLeftBattlefield,
-  movedInBattlefield
+  movedInBattlefield,
+  endedTurn
 } from "./battlefield";

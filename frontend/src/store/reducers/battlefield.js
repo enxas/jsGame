@@ -99,7 +99,8 @@ const reducer = (state = initialState, action) => {
                     action.movementData.actorId
                   ],
                   x: parseFloat(action.movementData.x),
-                  y: parseFloat(action.movementData.y)
+                  y: parseFloat(action.movementData.y),
+                  actionPoints: action.movementData.actionPoints
                 }
               }
             }
@@ -130,16 +131,24 @@ const reducer = (state = initialState, action) => {
         };
       }
 
-    // {
-    //   ...state.battlefieldData.actors.players,
-    //   [action.movementData.userId]: {
-    //     ...state.battlefieldData.actors.players[
-    //       action.movementData.userId
-    //     ],
-    //     x: parseFloat(action.movementData.x),
-    //     y: parseFloat(action.movementData.y)
-    //   }
-    // }
+    case actionTypes.PLAYER_ENDED_TURN:
+      console.log(action);
+      return {
+        ...state,
+        battlefieldData: {
+          ...state.battlefieldData,
+          actors: {
+            ...state.battlefieldData.actors,
+            players: {
+              ...state.battlefieldData.actors.players,
+              [action.userId.userId]: {
+                ...state.battlefieldData.actors.players[action.userId.userId],
+                actionPoints: action.userId.actionPoints
+              }
+            }
+          }
+        }
+      };
 
     default:
       return state;

@@ -25,6 +25,7 @@ class Battlefield extends Component {
       defence: "",
       positionX: 0,
       positionY: 0,
+      actionPoints: 0,
       canAttack: false
     }
   };
@@ -147,6 +148,22 @@ class Battlefield extends Component {
   componentDidMount() {
     console.log(` Battlefield.js componentDidMount`);
 
+    this.props.socket.on("onPlayerEndedTurn", data => {
+      this.props.onEndedTurn(data);
+
+      let addedToChat = [
+        ...this.state.chat,
+        "Actor " + data.actorId + " ended turn"
+      ];
+
+      this.setState(() => ({
+        chat: addedToChat
+      }));
+
+      // make chat scroll
+      this.chatboxRef.current.scrollTop = 999999;
+    });
+
     this.props.socket.on("onPlayerAttackedEnemy", data => {
       let formattedPlayerMultipl, formattedEnemyMultipl;
 
@@ -234,6 +251,7 @@ class Battlefield extends Component {
     this.props.socket.emit("disconnectedFromBattlefield");
     this.props.socket.off("onActorMovedInBattlefield");
     this.props.socket.off("onPlayerAttackedEnemy");
+    this.props.socket.off("onPlayerEndedTurn");
   }
 
   drawLayer2(images, x, y, spriteId) {
@@ -299,7 +317,8 @@ class Battlefield extends Component {
       defence: "",
       positionX: cell[0],
       positionY: cell[1],
-      canAttack: false
+      canAttack: false,
+      actionPoints: 0
     };
 
     for (let player in this.props.battlefieldData.actors.players) {
@@ -315,7 +334,9 @@ class Battlefield extends Component {
           defence: this.props.battlefieldData.actors.players[player].defence,
           positionX: this.props.battlefieldData.actors.players[player].x,
           positionY: this.props.battlefieldData.actors.players[player].y,
-          canAttack: false
+          canAttack: false,
+          actionPoints: this.props.battlefieldData.actors.players[player]
+            .actionPoints
         };
       }
     }
@@ -333,7 +354,9 @@ class Battlefield extends Component {
           defence: this.props.battlefieldData.actors.enemies[enemy].defence,
           positionX: this.props.battlefieldData.actors.enemies[enemy].x,
           positionY: this.props.battlefieldData.actors.enemies[enemy].y,
-          canAttack: true
+          canAttack: true,
+          actionPoints: this.props.battlefieldData.actors.enemies[enemy]
+            .actionPoints
         };
       }
     }
@@ -631,6 +654,14 @@ class Battlefield extends Component {
                     [ {this.state.info.positionX}:{this.state.info.positionY} ]
                   </td>
                 </tr>
+                <tr>
+                  <td style={{ textAlign: "left", fontWeight: "bold" }}>
+                    Action Points
+                  </td>
+                  <td style={{ textAlign: "left" }}>
+                    {this.state.info.actionPoints}
+                  </td>
+                </tr>
               </tbody>
             </table>
             {this.state.info.canAttack ? (
@@ -661,7 +692,8 @@ const mapDispatchToProps = dispatch => {
   return {
     onRedirectedToBattlefield: () =>
       dispatch(actions.redirectedToBattlefield()),
-    onMovedInBattlefield: data => dispatch(actions.movedInBattlefield(data))
+    onMovedInBattlefield: data => dispatch(actions.movedInBattlefield(data)),
+    onEndedTurn: data => dispatch(actions.endedTurn(data))
   };
 };
 

@@ -129,7 +129,7 @@ class Layout extends Component {
       //   console.log("--------------");
       //   console.log(data);
       //   this.props.onMovedInBattlefield(data);
-      // } 
+      // }
       //   console.log(
       //     "[Layout.js]  Actor " +
       //       data.actorId +
@@ -138,16 +138,6 @@ class Layout extends Component {
       //       "!"
       //   );
       // });
-
-      socket.on("onPlayerEndedTurn", data => {
-        toastr.options = {
-          closeButton: true,
-          progressBar: true
-        };
-        toastr.info("Player " + data.userId + " ended turn!", "Party");
-
-        console.log("[Layout.js] Player " + data.userId + " ended turn!");
-      });
 
       // socket.on("getMapData", data => {
       //   this.props.onGetMapData(data);

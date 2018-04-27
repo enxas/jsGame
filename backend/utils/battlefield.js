@@ -51,6 +51,7 @@ exports.movedInBattlefield = (socket, callback, directionMoved) => {
       .then(bfInfo => {
 
         if (bfInfo.actors.players[socket.userId].isEndedTurn === false) {
+          if (bfInfo.actors.players[socket.userId].actionPoints > 0) {
 
         const worldIntermediate = JSON.parse(JSON.stringify(floor1.mapLayout));
 
@@ -108,9 +109,13 @@ exports.movedInBattlefield = (socket, callback, directionMoved) => {
 
 
         const playersKey = 'actors.players.'+ socket.userId + '.' + axis;
+        const playersActionPoints = 'actors.players.'+ socket.userId + '.actionPoints';
+        const newActionPoints = bfInfo.actors.players[socket.userId].actionPoints - 1;
+        
 
         Battlefield.update({partyId: member.partyId}, {'$set': {
-          [playersKey]: newValue
+          [playersKey]: newValue,
+          [playersActionPoints]: newActionPoints,
         }}, function (err, success) {
           if (err) {
            
@@ -124,7 +129,9 @@ exports.movedInBattlefield = (socket, callback, directionMoved) => {
         partyId: member.partyId,
         userId: socket.userId,
         directionMoved: directionMoved.direction,
+        actionPoints: newActionPoints
       });
+      } // end of if (have action points)
     } // end of if (isEndedTurn)
 
 
@@ -157,9 +164,15 @@ exports.playerEndedTurn = (socket, callback, io) => {
       .then(bfInfo => {
 
         const playersKey = 'actors.players.'+ socket.userId + '.isEndedTurn';
+        const playersActionPoints = 'actors.players.'+ socket.userId + '.actionPoints';
+        let newActionPoints = bfInfo.actors.players[socket.userId].actionPoints + 6;
+        if (newActionPoints > 10) {
+          newActionPoints = 10;
+        }
 
         Battlefield.update({partyId: member.partyId}, {'$set': {
-          [playersKey]: true // TODO: change to true
+          [playersKey]: true,
+          [playersActionPoints]: newActionPoints,
         }}, function (err, success) {
           if (err) {
            
@@ -250,7 +263,8 @@ console.log(enemiesWithTargets);
 
       return callback({
         partyId: member.partyId,
-        userId: socket.userId
+        userId: socket.userId,
+        actionPoints: newActionPoints
       });
 
 
@@ -281,33 +295,55 @@ exports.playerAttackedEnemy = (socket, callback, attacked) => {
     .exec()
     .then(bfInfo => {
 
-    //   const playersKey = 'actors.players.'+ socket.userId + '.isEndedTurn';
+      if (bfInfo.actors.enemies[attacked.enemyId] !== undefined) {
 
-    //   Battlefield.update({partyId: member.partyId}, {'$set': {
-    //     [playersKey]: true // TODO: change to true
-    //   }}, function (err, success) {
-    //     if (err) {
-         
-    //     } else {
- 
-
-    //     }
-    // });
-console.log(attacked)
+    
+console.log(attacked.enemyId)
     const multipliers = [];
     const min = -40;
     const max = 40;
 
-    // player and enemy multiplier
+    // player multipliers[0] and enemy multipliers[1] multiplier
     multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
     multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
 
-    return callback({
-      partyId: member.partyId,
-      userId: socket.userId,
-      multipliers: multipliers
-    });
+    Math.abs(multipliers[0])
+    Math.abs(multipliers[1])
 
+    let playerAttackMultiplier = bfInfo.actors.players[socket.userId].attack / 100 * multipliers[0];
+    let enemyDefenceMultiplier = bfInfo.actors.enemies[attacked.enemyId].defence / 100 * multipliers[1];
+
+    let damage = (bfInfo.actors.players[socket.userId].attack + playerAttackMultiplier) - (bfInfo.actors.enemies[attacked.enemyId].defence + enemyDefenceMultiplier > 0);
+
+    if (damage > 0) {
+      let enemyLeftHealth = bfInfo.actors.enemies[attacked.enemyId].leftHp - damage;
+        const leftHealth = 'actors.enemies.'+ attacked.enemyId + '.leftHp';
+
+        Battlefield.update({partyId: member.partyId}, {'$set': {
+          [leftHealth]: enemyLeftHealth
+        }}, function (err, success) {
+          if (err) {
+          
+          } else {
+            return callback({
+              partyId: member.partyId,
+              userId: socket.userId,
+              multipliers: multipliers
+            });
+
+          }
+      });
+    } else {
+      damage = 0;
+      return callback({
+        partyId: member.partyId,
+        userId: socket.userId,
+        multipliers: multipliers
+      });
+    }
+
+   
+  }
 
     }).catch(err => {
       console.log(err);

@@ -114,3 +114,16 @@ export const movedInBattlefield = data => {
   };
 };
 /////////////////////////////////////////////////////
+
+export const onPlayerEndedTurn = data => {
+  return {
+    type: actionTypes.PLAYER_ENDED_TURN,
+    userId: data
+  };
+};
+
+export const endedTurn = data => {
+  return dispatch => {
+    dispatch(onPlayerEndedTurn(data));
+  };
+};
