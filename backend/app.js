@@ -104,15 +104,16 @@ io.on("connection", socket => {
     utils_battlefield.playerEndedTurn(socket, callback, io);
   });
 
-  socket.on("playerAttackedEnemy", (attacked) => {
+  socket.on("playerAttackedEnemy", (attackData) => {
     const callback = data => {
       io.to(data.partyId).emit("onPlayerAttackedEnemy", {
         userId: data.userId,
-        multipliers: data.multipliers
+        multipliers: data.multipliers,
+        actionPoints: data.actionPoints,
       });
     };
 
-    utils_battlefield.playerAttackedEnemy(socket, callback, attacked);
+    utils_battlefield.playerAttackedEnemy(socket, callback, attackData);
   });
   
   

@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const battlefieldSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     partyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Party', required: true, unique: true },
+    floor: { type: Number, required: true },
+    turnNo: { type: Number, required: true },
+    playersMultiplier: { type: Number, required: true },
+    enemiesMultiplier: { type: Number, required: true },
     actors: {}
 });
 

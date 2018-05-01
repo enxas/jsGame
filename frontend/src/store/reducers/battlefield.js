@@ -132,6 +132,7 @@ const reducer = (state = initialState, action) => {
       }
 
     case actionTypes.PLAYER_ENDED_TURN:
+      console.log("PLAYER_ENDED_TURN:");
       console.log(action);
       return {
         ...state,
@@ -141,9 +142,29 @@ const reducer = (state = initialState, action) => {
             ...state.battlefieldData.actors,
             players: {
               ...state.battlefieldData.actors.players,
-              [action.userId.userId]: {
-                ...state.battlefieldData.actors.players[action.userId.userId],
-                actionPoints: action.userId.actionPoints
+              [action.player.userId]: {
+                ...state.battlefieldData.actors.players[action.player.userId],
+                actionPoints: action.player.actionPoints
+              }
+            }
+          }
+        }
+      };
+
+    case actionTypes.PLAYER_ATTACKED_ENEMY:
+      console.log("PLAYER_ATTACKED_ENEMY:");
+      console.log(action);
+      return {
+        ...state,
+        battlefieldData: {
+          ...state.battlefieldData,
+          actors: {
+            ...state.battlefieldData.actors,
+            players: {
+              ...state.battlefieldData.actors.players,
+              [action.player.userId]: {
+                ...state.battlefieldData.actors.players[action.player.userId],
+                actionPoints: action.player.actionPoints
               }
             }
           }

@@ -14,9 +14,11 @@ class Battlefield extends Component {
     windowHeight: 0,
     allLoadedImages: null,
     chat: ["Welcome and Thank You for playing!"],
-    playerMultipl: 0,
-    enemyMultipl: 0,
+    turnNo: 1,
+    playersMultiplier: "0%",
+    enemiesMultiplier: "0%",
     showSpinner: false,
+    skillSelected: 0,
     info: {
       name: "",
       hpLeft: 0,
@@ -25,8 +27,7 @@ class Battlefield extends Component {
       defence: "",
       positionX: 0,
       positionY: 0,
-      actionPoints: 0,
-      canAttack: false
+      actionPoints: 0
     }
   };
   // requestAnimationFrame();
@@ -164,50 +165,92 @@ class Battlefield extends Component {
       this.chatboxRef.current.scrollTop = 999999;
     });
 
-    this.props.socket.on("onPlayerAttackedEnemy", data => {
-      let formattedPlayerMultipl, formattedEnemyMultipl;
-
-      if (data.userId === this.props.userId) {
-        if (data.multipliers[0] > 0) {
-          formattedPlayerMultipl = "+" + data.multipliers[0] + "%";
-        } else if (data.multipliers[0] < 0) {
-          formattedPlayerMultipl = data.multipliers[0] + "%";
-        } else {
-          formattedPlayerMultipl = data.multipliers[0] + "%";
-        }
-
-        if (data.multipliers[1] > 0) {
-          formattedEnemyMultipl = "+" + data.multipliers[1] + "%";
-        } else if (data.multipliers[1] < 0) {
-          formattedEnemyMultipl = data.multipliers[1] + "%";
-        } else {
-          formattedEnemyMultipl = data.multipliers[1] + "%";
-        }
-
-        this.setState(() => ({
-          playerMultipl: formattedPlayerMultipl,
-          enemyMultipl: formattedEnemyMultipl,
-          showSpinner: false
-        }));
-      }
-
-      let addedToChat = [
-        ...this.state.chat,
-        "Actor " +
-          data.userId +
-          " rolled " +
-          formattedPlayerMultipl +
-          " enemy rolled " +
-          formattedEnemyMultipl +
-          " !"
-      ];
+    this.props.socket.on("turnEnded", data => {
+      console.log("TURN ENDED");
+      console.log(data);
 
       this.setState(() => ({
-        chat: addedToChat
+        showSpinner: true
       }));
 
-      // make chat scroll
-      this.chatboxRef.current.scrollTop = 999999;
+      let formattedPlayerMultipl, formattedEnemyMultipl;
+      if (data.playersMultiplier > 0) {
+        formattedPlayerMultipl = "+" + data.playersMultiplier + "%";
+      } else if (data.playersMultiplier < 0) {
+        formattedPlayerMultipl = data.playersMultiplier + "%";
+      } else {
+        formattedPlayerMultipl = data.playersMultiplier + "%";
+      }
+
+      if (data.enemiesMultiplier > 0) {
+        formattedEnemyMultipl = "+" + data.enemiesMultiplier + "%";
+      } else if (data.enemiesMultiplier < 0) {
+        formattedEnemyMultipl = data.enemiesMultiplier + "%";
+      } else {
+        formattedEnemyMultipl = data.enemiesMultiplier + "%";
+      }
+
+      // after turn starts show spinner for 750 ms then display new multipliers and turn
+      setTimeout(
+        function() {
+          this.setState(() => ({
+            turnNo: data.newTurn,
+            playersMultiplier: formattedPlayerMultipl,
+            enemiesMultiplier: formattedEnemyMultipl,
+            showSpinner: false
+          }));
+        }.bind(this),
+        650
+      );
+    });
+
+    this.props.socket.on("onPlayerAttackedEnemy", data => {
+      console.log("onPlayerAttackedEnemy:");
+      console.log(data);
+      this.props.onPlayerAttackedEnemy(data);
+      // let formattedPlayerMultipl, formattedEnemyMultipl;
+
+      // if (data.userId === this.props.userId) {
+      //   if (data.multipliers[0] > 0) {
+      //     formattedPlayerMultipl = "+" + data.multipliers[0] + "%";
+      //   } else if (data.multipliers[0] < 0) {
+      //     formattedPlayerMultipl = data.multipliers[0] + "%";
+      //   } else {
+      //     formattedPlayerMultipl = data.multipliers[0] + "%";
+      //   }
+
+      //   if (data.multipliers[1] > 0) {
+      //     formattedEnemyMultipl = "+" + data.multipliers[1] + "%";
+      //   } else if (data.multipliers[1] < 0) {
+      //     formattedEnemyMultipl = data.multipliers[1] + "%";
+      //   } else {
+      //     formattedEnemyMultipl = data.multipliers[1] + "%";
+      //   }
+
+      //   this.setState(() => ({
+      //     playersMultiplier: formattedPlayerMultipl,
+      //     enemiesMultiplier: formattedEnemyMultipl,
+      //     showSpinner: false
+      //   }));
+      // }
+
+      // let addedToChat = [
+      //   ...this.state.chat,
+      //   "Actor " +
+      //     data.userId +
+      //     " rolled " +
+      //     formattedPlayerMultipl +
+      //     " enemy rolled " +
+      //     formattedEnemyMultipl +
+      //     " !"
+      // ];
+
+      // this.setState(() => ({
+      //   chat: addedToChat
+      // }));
+
+      // // make chat scroll
+      // this.chatboxRef.current.scrollTop = 999999;
     });
 
     this.props.socket.on("onActorMovedInBattlefield", data => {
@@ -317,7 +360,6 @@ class Battlefield extends Component {
       defence: "",
       positionX: cell[0],
       positionY: cell[1],
-      canAttack: false,
       actionPoints: 0
     };
 
@@ -334,7 +376,6 @@ class Battlefield extends Component {
           defence: this.props.battlefieldData.actors.players[player].defence,
           positionX: this.props.battlefieldData.actors.players[player].x,
           positionY: this.props.battlefieldData.actors.players[player].y,
-          canAttack: false,
           actionPoints: this.props.battlefieldData.actors.players[player]
             .actionPoints
         };
@@ -354,7 +395,6 @@ class Battlefield extends Component {
           defence: this.props.battlefieldData.actors.enemies[enemy].defence,
           positionX: this.props.battlefieldData.actors.enemies[enemy].x,
           positionY: this.props.battlefieldData.actors.enemies[enemy].y,
-          canAttack: true,
           actionPoints: this.props.battlefieldData.actors.enemies[enemy]
             .actionPoints
         };
@@ -367,24 +407,17 @@ class Battlefield extends Component {
   };
 
   handleAttackEnemy = () => {
-    this.setState(() => ({
-      showSpinner: true
-    }));
-
-    // wait 500 ms before sending request and show spinner meanwhile
-    setTimeout(
-      function() {
-        this.props.socket.emit("playerAttackedEnemy", {
-          enemyId: this.state.info.name
-        });
-      }.bind(this),
-      500
-    );
+    this.props.socket.emit("playerAttackedEnemy", {
+      // enemyId: this.state.info.name,
+      x: this.state.info.positionX,
+      y: this.state.info.positionY,
+      skillId: this.state.skillSelected
+    });
   };
 
   render() {
-    let playerMultiplierOrSpinner = this.state.playerMultipl;
-    let enemyMultiplierOrSpinner = this.state.enemyMultipl;
+    let playerMultiplierOrSpinner = this.state.playersMultiplier;
+    let enemyMultiplierOrSpinner = this.state.enemiesMultiplier;
     if (this.state.showSpinner) {
       playerMultiplierOrSpinner = <img src={spinner} />;
       enemyMultiplierOrSpinner = <img src={spinner} />;
@@ -434,15 +467,15 @@ class Battlefield extends Component {
                       textAlign: "center"
                     }}
                   >
-                    Multipliers
+                    Turn {this.state.turnNo} Multipliers
                   </th>
                 </tr>
                 <tr>
                   <th style={{ textAlign: "center", backgroundColor: "#eee" }}>
-                    Player
+                    Players
                   </th>
                   <th style={{ textAlign: "center", backgroundColor: "#eee" }}>
-                    Enemy
+                    Enemies
                   </th>
                 </tr>
               </thead>
@@ -664,9 +697,8 @@ class Battlefield extends Component {
                 </tr>
               </tbody>
             </table>
-            {this.state.info.canAttack ? (
-              <button onClick={() => this.handleAttackEnemy()}>ATTACK</button>
-            ) : null}
+
+            <button onClick={() => this.handleAttackEnemy()}>ATTACK</button>
           </div>
         </div>
       </div>
@@ -693,7 +725,8 @@ const mapDispatchToProps = dispatch => {
     onRedirectedToBattlefield: () =>
       dispatch(actions.redirectedToBattlefield()),
     onMovedInBattlefield: data => dispatch(actions.movedInBattlefield(data)),
-    onEndedTurn: data => dispatch(actions.endedTurn(data))
+    onEndedTurn: data => dispatch(actions.endedTurn(data)),
+    onPlayerAttackedEnemy: data => dispatch(actions.playerAttackedEnemy(data))
   };
 };
 

@@ -15,5 +15,6 @@ export {
   playerEnteredBattlefield,
   playerLeftBattlefield,
   movedInBattlefield,
-  endedTurn
+  endedTurn,
+  playerAttackedEnemy
 } from "./battlefield";

@@ -153,21 +153,67 @@ async function makeTurn (partyId, io) {
     Battlefield.findOne({ partyId: partyId })
     .exec()
     .then(bfInfo => {
-    for (let player3 in bfInfo.actors.players) {
 
-      const playersKey = 'actors.players.'+ player3 + '.isEndedTurn';
+      const multipliers = [];
+      const min = -40;
+      const max = 40;
+      const newTurn = bfInfo.turnNo+1;
+  
+      // player multipliers[0] and enemy multipliers[1] multiplier
+      multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
+      multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
+
+      const playersObj = {};
+      for (let player3 in bfInfo.actors.players) {
+        let key = 'actors.players.'+ player3 + '.isEndedTurn';
+          playersObj[key] = false;
+      }
+    
+
       Battlefield.update({partyId: partyId}, {'$set': {
-        [playersKey]: false
+          turnNo: newTurn,
+          playersMultiplier: multipliers[0],
+          enemiesMultiplier: multipliers[1],
+          playersObj
       }}, function (err, success) {
         if (err) {
-         console.log('Error occurred in a enemyActions.js makeTurn() method (5)');
-        console.log(err);
+        
         } else {
 
-
-        }
+       // emit to players that turn has ended and update information
+      io.to(partyId).emit("turnEnded", {
+        newTurn: newTurn,
+        playersMultiplier: multipliers[0],
+        enemiesMultiplier: multipliers[1],
       });
-    }
+       
+        }
+    });
+
+     
+
+
+//     const playersObj = {};
+//     for (let player3 in bfInfo.actors.players) {
+// let key = 'actors.players.'+ player3 + '.isEndedTurn';
+//         playersObj[key] = false;
+     
+
+//       const playersKey = 'actors.players.'+ player3 + '.isEndedTurn';
+//       Battlefield.update({partyId: partyId}, {'$set': {
+//         [playersKey]: false
+//       }}, function (err, success) {
+//         if (err) {
+//          console.log('Error occurred in a enemyActions.js makeTurn() method (5)');
+//         console.log(err);
+//         } else {
+
+
+//         }
+//       });
+//     }
+
+
     }).catch(err => {
       console.log('Error occurred in a enemyActions.js makeTurn() method (6)');
       console.log(err);
@@ -181,63 +227,6 @@ async function makeTurn (partyId, io) {
 var interval = setInterval(movementFunc, 1900);
 movementFunc();
 
-
- 
-
-/*
-      Battlefield.findOne({ partyId: partyId })
-      .exec()
-      .then(bfInfo => {
-
-        if (bfInfo.actors.players[socket.userId].isEndedTurn === false) {
-
-        let axis;
-        let newValue;
-
-        if (directionMoved.direction === 'up') {
-          axis = 'y';
-          newValue = bfInfo.actors.players[socket.userId].y -= 1;
-        } else if (directionMoved.direction === 'down') {
-          axis = 'y';
-          newValue = bfInfo.actors.players[socket.userId].y += 1;
-        } else if (directionMoved.direction === 'left') {
-          axis = 'x';
-          newValue = bfInfo.actors.players[socket.userId].x -= 1;
-        } else if (directionMoved.direction === 'right') {
-          axis = 'x';
-          newValue = bfInfo.actors.players[socket.userId].x += 1;
-        }
-
-
-        const playersKey = 'actors.players.'+ socket.userId + '.' + axis;
-
-        Battlefield.update({partyId: partyId}, {'$set': {
-          [playersKey]: newValue
-        }}, function (err, success) {
-          if (err) {
-           
-          } else {
-         
-          }
-      });
-
-
-      return callback({
-        partyId: partyId,
-        userId: socket.userId,
-        directionMoved: directionMoved.direction,
-      });
-    } // end of if (isEndedTurn)
-
-
-      }).catch(err => {
-        console.log(err);
-        return callback({
-          message: err,
-          error: true
-        });
-      });
-*/
 
 
 };

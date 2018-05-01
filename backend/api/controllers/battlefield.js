@@ -88,10 +88,13 @@ exports.mapData = (req, res, next) => {
         const battlefieldData = {
           _id: mongoose.Types.ObjectId(),
           partyId: party._id,
-          "floor": 1,
-          "actors": {
-            "players": playersObj,
-            "enemies": enemiesObj
+          floor: 1,
+          turnNo: 1,
+          playersMultiplier: 0,
+          enemiesMultiplier: 0,
+          actors: {
+            players: playersObj,
+            enemies: enemiesObj
           }
         }; 
    
@@ -132,72 +135,6 @@ exports.mapData = (req, res, next) => {
           });
         });
     
- 
-
-  // User.find({ userId: req.userData.userId })
-  // .exec()
-  // .then(user => {
-  // Battlefield.find({ partyId: req.userData.userId })
-  //   .exec()
-  //   .then(myParty => {
-  //     if (myParty.length > 0) {
-  //       return res.status(200).json({
-  //         error: true,
-  //         message: "You already belong in a party!"
-  //       });
-  //     }
-  //     const generatedPartyId = mongoose.Types.ObjectId();
-  //     const party = new Party({
-  //       _id: generatedPartyId,
-  //       creator: req.userData.userId,
-  //       floor: req.body.floorLevel,
-  //       members: 1
-  //     });
-  //     party.save();
-  //     const partyMember = new PartyMember({
-  //       _id: mongoose.Types.ObjectId(),
-  //       userId: req.userData.userId,
-  //       partyId: generatedPartyId
-  //     });
-  //     partyMember.save();
-
-  //     // SOCKETS START
-  //     const socketio = req.app.get("socketio");
-
-  //     Object.keys(sharedVars.socketsList).forEach(element => {
-  //       if (sharedVars.socketsList[element].userId == req.userData.userId) {
-  //         sharedVars.socketsList[element].join(generatedPartyId);
-  //         console.log("CREATED AND JOINED SOCKET");
-  //       }
-  //     });
-
-  //     // SOCKETS END
-
-  //     User.findOne({ _id: req.userData.userId }, (err, user) => {
-  //       if (err) return res.status(200).send(err);
-  //       return res.status(200).json({
-  //         error: false,
-  //         message: "Party created!",
-  //         partyId: generatedPartyId,
-  //         floor: req.body.floorLevel,
-  //         members: [user.email]
-  //       });
-  //     });
-  //   })
-  //   .catch(err => {
-  //     console.log(err);
-  //     res.status(500).json({
-  //       error: true,
-  //       message: err
-  //     });
-  //   });
-  // });
-
-
-
-
-
-
 
 
 

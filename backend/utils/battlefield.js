@@ -286,7 +286,9 @@ console.log(enemiesWithTargets);
     });
 };
 
-exports.playerAttackedEnemy = (socket, callback, attacked) => {
+exports.playerAttackedEnemy = (socket, callback, attackData) => {
+  // attackData = { removed - enemyId: '', 
+  // x: 14, y: 9, skillId: 0 }
   PartyMember.findOne({ userId: socket.userId })
   .exec()
   .then(member => {
@@ -295,55 +297,71 @@ exports.playerAttackedEnemy = (socket, callback, attacked) => {
     .exec()
     .then(bfInfo => {
 
-      if (bfInfo.actors.enemies[attacked.enemyId] !== undefined) {
+      let actionPoints = bfInfo.actors.players[socket.userId].actionPoints;
+      let newActionPoints = actionPoints - 2;
+        if (actionPoints > 1) {
 
-    
-console.log(attacked.enemyId)
-    const multipliers = [];
-    const min = -40;
-    const max = 40;
 
-    // player multipliers[0] and enemy multipliers[1] multiplier
-    multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
-    multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
+         
+        
+           
+     
 
-    Math.abs(multipliers[0])
-    Math.abs(multipliers[1])
-
-    let playerAttackMultiplier = bfInfo.actors.players[socket.userId].attack / 100 * multipliers[0];
-    let enemyDefenceMultiplier = bfInfo.actors.enemies[attacked.enemyId].defence / 100 * multipliers[1];
-
-    let damage = (bfInfo.actors.players[socket.userId].attack + playerAttackMultiplier) - (bfInfo.actors.enemies[attacked.enemyId].defence + enemyDefenceMultiplier > 0);
-
-    if (damage > 0) {
-      let enemyLeftHealth = bfInfo.actors.enemies[attacked.enemyId].leftHp - damage;
-        const leftHealth = 'actors.enemies.'+ attacked.enemyId + '.leftHp';
-
-        Battlefield.update({partyId: member.partyId}, {'$set': {
-          [leftHealth]: enemyLeftHealth
-        }}, function (err, success) {
-          if (err) {
-          
+      for (let enemy in bfInfo.actors.enemies) {
+        if (bfInfo.actors.enemies[enemy].x === attackData.x && bfInfo.actors.enemies[enemy].y === attackData.y) {
+          console.log('found enemy');
+          const multipliers = [];
+          const min = -40;
+          const max = 40;
+      
+          // player multipliers[0] and enemy multipliers[1] multiplier
+          multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
+          multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
+      
+          Math.abs(multipliers[0])
+          Math.abs(multipliers[1])
+      
+          let playerAttackMultiplier = bfInfo.actors.players[socket.userId].attack / 100 * multipliers[0];
+          let enemyDefenceMultiplier = bfInfo.actors.enemies[enemy].defence / 100 * multipliers[1];
+      
+          let damage = parseInt((bfInfo.actors.players[socket.userId].attack + playerAttackMultiplier) - (bfInfo.actors.enemies[enemy].defence + enemyDefenceMultiplier));
+          console.log(`dmage: ${damage}`);
+          if (damage > 0) {
+            let enemyLeftHealth = bfInfo.actors.enemies[enemy].hpLeft - damage;
+            console.log(`enemyLeftHealth: ${enemyLeftHealth}`);
+              const leftHealth = 'actors.enemies.'+ enemy + '.hpLeft';
+              const playersActionPoints = 'actors.players.'+ socket.userId + '.actionPoints';
+      
+              Battlefield.update({partyId: member.partyId}, {'$set': {
+                [leftHealth]: enemyLeftHealth,
+                [playersActionPoints]: newActionPoints,
+              }}, function (err, success) {
+                if (err) {
+                
+                } else {
+                  return callback({
+                    partyId: member.partyId,
+                    userId: socket.userId,
+                    actionPoints: newActionPoints
+                  });
+      
+                }
+            });
           } else {
+            damage = 0;
             return callback({
               partyId: member.partyId,
               userId: socket.userId,
-              multipliers: multipliers
+              actionPoints: newActionPoints
             });
-
           }
-      });
-    } else {
-      damage = 0;
-      return callback({
-        partyId: member.partyId,
-        userId: socket.userId,
-        multipliers: multipliers
-      });
-    }
 
+        }
+      }
+
+    }
    
-  }
+  
 
     }).catch(err => {
       console.log(err);
@@ -354,6 +372,7 @@ console.log(attacked.enemyId)
     });
 
   })
+
   .catch(err => {
     console.log(err);
     return callback({
