@@ -164,18 +164,17 @@ async function makeTurn (partyId, io) {
       multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
 
       const playersObj = {};
+      playersObj['turnNo'] = newTurn;
+      playersObj['playersMultiplier'] = multipliers[0];
+      playersObj['enemiesMultiplier'] = multipliers[1];
+
       for (let player3 in bfInfo.actors.players) {
         let key = 'actors.players.'+ player3 + '.isEndedTurn';
           playersObj[key] = false;
       }
-    
 
-      Battlefield.update({partyId: partyId}, {'$set': {
-          turnNo: newTurn,
-          playersMultiplier: multipliers[0],
-          enemiesMultiplier: multipliers[1],
-          playersObj
-      }}, function (err, success) {
+      Battlefield.update({partyId: partyId}, {'$set': playersObj}, 
+      function (err, success) {
         if (err) {
         
         } else {

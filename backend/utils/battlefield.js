@@ -4,6 +4,7 @@ const PartyMember = require("../models/partyMember");
 const Battlefield = require("../models/battlefield");
 const enemyActions = require("./enemyActions");
 const floor1 = require("../api/floors/1");
+const skills = require("./skills");
 
 exports.connectToBattlefield = (socket, callback) => {
   PartyMember.findOne({ userId: socket.userId })
@@ -300,13 +301,26 @@ exports.playerAttackedEnemy = (socket, callback, attackData) => {
       let actionPoints = bfInfo.actors.players[socket.userId].actionPoints;
       let newActionPoints = actionPoints - 2;
         if (actionPoints > 1) {
+let direction;
+          // TODO: check if a player has a skill that he is using
+// get direction of used skill (N, E, S, W)
+if (attackData.x > bfInfo.actors.players[socket.userId].x) {
+  direction = 'E';
+}else if (attackData.x < bfInfo.actors.players[socket.userId].x) {
+  direction = 'W';
+}else if (attackData.y > bfInfo.actors.players[socket.userId].y) {
+  direction = 'S';
+}else if (attackData.y < bfInfo.actors.players[socket.userId].y) {
+  direction = 'N';
+}
 
-
-         
-        
-           
+          let actionsLog = skills.calculateDamage(attackData.x, attackData.y, attackData.skillId, bfInfo, direction, bfInfo.actors.players[socket.userId].x, bfInfo.actors.players[socket.userId].y,socket.userId);
+        console.log('actionsLog:');
+        console.log(actionsLog);
      
 
+
+/*
       for (let enemy in bfInfo.actors.enemies) {
         if (bfInfo.actors.enemies[enemy].x === attackData.x && bfInfo.actors.enemies[enemy].y === attackData.y) {
           console.log('found enemy');
@@ -358,6 +372,8 @@ exports.playerAttackedEnemy = (socket, callback, attackData) => {
 
         }
       }
+*/
+
 
     }
    

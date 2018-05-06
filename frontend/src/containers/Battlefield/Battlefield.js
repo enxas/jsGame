@@ -18,7 +18,7 @@ class Battlefield extends Component {
     playersMultiplier: "0%",
     enemiesMultiplier: "0%",
     showSpinner: false,
-    skillSelected: 0,
+    skillSelected: 2,
     info: {
       name: "",
       hpLeft: 0,
