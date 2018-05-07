@@ -63,8 +63,8 @@ exports.mapData = (req, res, next) => {
             hpLeft: 100,
             attack: 12,
             defence: 8,
-            x: 3,
-            y: 3+index,
+            x: 13,
+            y: 8+index,
             actionPoints: 10,
             isConnected: false,
             isEndedTurn: false

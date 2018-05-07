@@ -314,9 +314,18 @@ if (attackData.x > bfInfo.actors.players[socket.userId].x) {
   direction = 'N';
 }
 
-          let actionsLog = skills.calculateDamage(attackData.x, attackData.y, attackData.skillId, bfInfo, direction, bfInfo.actors.players[socket.userId].x, bfInfo.actors.players[socket.userId].y,socket.userId);
-        console.log('actionsLog:');
-        console.log(actionsLog);
+
+
+const callback_combatLog = combatLog => {
+  return callback({
+    partyId: member.partyId,
+    userId: socket.userId,
+    combatLog: combatLog
+  });
+};
+
+     skills.calculateDamage(attackData.x, attackData.y, attackData.skillId, bfInfo, direction, bfInfo.actors.players[socket.userId].x, bfInfo.actors.players[socket.userId].y,socket.userId, member.partyId, callback_combatLog);
+ 
      
 
 

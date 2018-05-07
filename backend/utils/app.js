@@ -108,7 +108,8 @@ io.on("connection", socket => {
     const callback = data => {
       io.to(data.partyId).emit("onPlayerAttackedEnemy", {
         userId: data.userId,
-        combatLog: data.combatLog,
+        multipliers: data.multipliers,
+        actionPoints: data.actionPoints,
       });
     };
 

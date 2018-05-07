@@ -4,6 +4,13 @@ import * as actions from "../../store/actions/index";
 import "../../assets/css/battlefield.css";
 import spinner from "../../assets/images/spinner.svg";
 
+import skill0 from "../../assets/images/skill0.png";
+import skill1 from "../../assets/images/skill1.png";
+import skill2 from "../../assets/images/skill2.png";
+import skill3 from "../../assets/images/skill3.png";
+import skill4 from "../../assets/images/skill4.png";
+import skill5 from "../../assets/images/skill5.png";
+
 class Battlefield extends Component {
   constructor(props) {
     super(props);
@@ -234,23 +241,25 @@ class Battlefield extends Component {
       //   }));
       // }
 
-      // let addedToChat = [
-      //   ...this.state.chat,
-      //   "Actor " +
-      //     data.userId +
-      //     " rolled " +
-      //     formattedPlayerMultipl +
-      //     " enemy rolled " +
-      //     formattedEnemyMultipl +
-      //     " !"
-      // ];
+      for (let logEntry in data.combatLog) {
+        let addedToChat = [
+          ...this.state.chat,
+          "Actor " +
+            data.combatLog[logEntry].attackingActor +
+            " did " +
+            data.combatLog[logEntry].damage +
+            " damage to " +
+            data.combatLog[logEntry].attackedActor +
+            " !"
+        ];
 
-      // this.setState(() => ({
-      //   chat: addedToChat
-      // }));
+        this.setState(() => ({
+          chat: addedToChat
+        }));
+      }
 
-      // // make chat scroll
-      // this.chatboxRef.current.scrollTop = 999999;
+      // make chat scroll
+      this.chatboxRef.current.scrollTop = 999999;
     });
 
     this.props.socket.on("onActorMovedInBattlefield", data => {
@@ -327,6 +336,10 @@ class Battlefield extends Component {
     this.props.socket.emit("movedInBattlefield", {
       direction: moveDirection
     });
+  };
+
+  handleSkillPress = skillId => {
+    console.log(`clicked skill: ${skillId}`);
   };
 
   handleTurnEnding = () => {
@@ -700,6 +713,75 @@ class Battlefield extends Component {
 
             <button onClick={() => this.handleAttackEnemy()}>ATTACK</button>
           </div>
+        </div>
+
+        <div
+          style={{
+            right: 5 + "px",
+            bottom: 0 + "px",
+            position: "fixed"
+          }}
+        >
+          <img
+            onClick={() => this.handleSkillPress(0)}
+            alt=""
+            src={skill0}
+            style={{
+              height: 42 + "px",
+              width: 42 + "px",
+              marginLeft: 5 + "px"
+            }}
+          />
+          <img
+            onClick={() => this.handleSkillPress(1)}
+            alt=""
+            src={skill1}
+            style={{
+              height: 42 + "px",
+              width: 42 + "px",
+              marginLeft: 5 + "px"
+            }}
+          />
+          <img
+            onClick={() => this.handleSkillPress(2)}
+            alt=""
+            src={skill2}
+            style={{
+              height: 42 + "px",
+              width: 42 + "px",
+              marginLeft: 5 + "px"
+            }}
+          />
+          <img
+            onClick={() => this.handleSkillPress(3)}
+            alt=""
+            src={skill3}
+            style={{
+              height: 42 + "px",
+              width: 42 + "px",
+              marginLeft: 5 + "px"
+            }}
+          />
+          <img
+            onClick={() => this.handleSkillPress(4)}
+            alt=""
+            src={skill4}
+            style={{
+              height: 42 + "px",
+              width: 42 + "px",
+              marginLeft: 5 + "px"
+            }}
+          />
+          <img
+            onClick={() => this.handleSkillPress(5)}
+            alt=""
+            src={skill5}
+            style={{
+              height: 42 + "px",
+              width: 42 + "px",
+              marginLeft: 5 + "px"
+            }}
+          />
         </div>
       </div>
     );

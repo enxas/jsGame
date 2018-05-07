@@ -164,7 +164,7 @@ const reducer = (state = initialState, action) => {
               ...state.battlefieldData.actors.players,
               [action.player.userId]: {
                 ...state.battlefieldData.actors.players[action.player.userId],
-                actionPoints: action.player.actionPoints
+                actionPoints: action.player.combatLog.actionPoints
               }
             }
           }

@@ -1,28 +1,38 @@
 const Battlefield = require("../models/battlefield");
 module.exports = {
-    calculateDamage: function (x, y, skillId, bfInfo, direction, actorX, actorY, userId) {
+    calculateDamage: function (x, y, skillId, bfInfo, direction, actorX, actorY, userId, partyId, callback) {
       
-        const affectedTiles = [];
+        let affectedTiles = [];
+        let combatLog = [];
         let rotateAroundAxis = true;
-
+        const updatedInfoObj = {};
+        console.log(`skillId: ${skillId}`);
         switch (skillId) {
             case 1:
+            console.log('case 1');
                 affectedTiles.push([x, y]);
             break;
             case 2:
+            console.log('case 2');
                 // pattern https://puu.sh/AhbAO/6d9d4a9241.jpg
                 const patterns = [[0,-1],[1,0],[0,1]];
-                const affectedTiles = rotate(patterns, direction);  
+                affectedTiles = rotate(patterns, direction);  
             break;
             default:
+            console.log('case DEFAULT');
               return null;
           }
 
-          performDamage();
-
-          function performDamage() {
+       
+          let newActionPoints = bfInfo.actors.players[userId].actionPoints - 2;
+          let playersActionPoints = 'actors.players.'+ userId + '.actionPoints';
+          updatedInfoObj[playersActionPoints] = newActionPoints;
+        
               // check affected tiles for enemies and performa damage to affected enemies
-              for (let affectedTile of affectedTiles) {
+              console.log(`before afftiles: ${affectedTiles}`);
+            for (let affectedTile of affectedTiles) {
+                  console.log('affectedTile:');
+                  console.log(affectedTile);
               for (let enemy in bfInfo.actors.enemies) {
                 if (bfInfo.actors.enemies[enemy].x === affectedTile[0] && bfInfo.actors.enemies[enemy].y === affectedTile[1]) {
                   console.log('found enemy');
@@ -32,37 +42,44 @@ module.exports = {
               
                   let damage = parseInt((bfInfo.actors.players[userId].attack + playerAttackMultiplier) - (bfInfo.actors.enemies[enemy].defence + enemyDefenceMultiplier));
                   console.log(`dmage: ${damage}`);
+                 
+            
+
                   if (damage > 0) {
                     let enemyLeftHealth = bfInfo.actors.enemies[enemy].hpLeft - damage;
-                    console.log(`enemyLeftHealth: ${enemyLeftHealth}`);
-                      const leftHealth = 'actors.enemies.'+ enemy + '.hpLeft';
-                      const playersActionPoints = 'actors.players.'+ userId + '.actionPoints';
-              
-                      Battlefield.update({partyId: member.partyId}, {'$set': {
-                        [leftHealth]: enemyLeftHealth,
-                        [playersActionPoints]: newActionPoints,
-                      }}, function (err, success) {
-                        if (err) {
-                        
-                        } else {
-                          return {
-                            actionPoints: newActionPoints
-                          };
-              
-                        }
+                    let leftHealth = 'actors.enemies.'+ enemy + '.hpLeft';
+                    updatedInfoObj[leftHealth] = enemyLeftHealth;
+                    combatLog.push({
+                        attackingActor: userId,
+                        attackedActor: enemy,
+                        damage: damage,
+                        actionPoints: newActionPoints
                     });
                   } else {
-                    damage = 0;
-                    return {
+                    combatLog.push({
+                        attackingActor: userId,
+                        attackedActor: enemy,
+                        damage: 0,
                         actionPoints: newActionPoints
-                      };
+                    });
                   }
         
+
                 }
               }
             }
+
+
+            Battlefield.update({partyId: partyId}, {'$set': updatedInfoObj}, 
+            function (err, success) {
+                if (err) {
+                
+                } else {
+                    callback(combatLog);
+                }
+            });
        
-          }
+     
 
           function rotate(patterns, direction) {
          /* 
