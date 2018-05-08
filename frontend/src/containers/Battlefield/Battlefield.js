@@ -11,6 +11,9 @@ import skill3 from "../../assets/images/skill3.png";
 import skill4 from "../../assets/images/skill4.png";
 import skill5 from "../../assets/images/skill5.png";
 
+const skillPatterns = require("../../utils/skillPatterns");
+const helpers = require("../../utils/helpers");
+
 class Battlefield extends Component {
   constructor(props) {
     super(props);
@@ -25,7 +28,8 @@ class Battlefield extends Component {
     playersMultiplier: "0%",
     enemiesMultiplier: "0%",
     showSpinner: false,
-    skillSelected: 2,
+    skillSelected: 0,
+    skillDirection: null,
     info: {
       name: "",
       hpLeft: 0,
@@ -41,7 +45,7 @@ class Battlefield extends Component {
   drawField(fieldArr) {
     const componentTHIS = this;
 
-    const windowWidth = window.innerWidth - 300;
+    // const windowWidth = window.innerWidth - 300;
     const windowHeight = window.innerHeight - 200;
 
     this.setState(() => ({
@@ -110,7 +114,7 @@ class Battlefield extends Component {
     const tileHeight = 32;
 
     const canvas2 = this.refs.canvas2;
-    const globalTHIS = this;
+    const self = this;
 
     if (
       canvas2.width !== worldWidth * tileWidth &&
@@ -129,26 +133,48 @@ class Battlefield extends Component {
       ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
 
       // draw players
-      for (let playerId in globalTHIS.props.battlefieldData.actors.players) {
+      for (let playerId in self.props.battlefieldData.actors.players) {
         if (
-          globalTHIS.props.battlefieldData.actors.players[playerId]
-            .isConnected === true
+          self.props.battlefieldData.actors.players[playerId].isConnected ===
+          true
         ) {
           ctx2.drawImage(
-            globalTHIS.state.allLoadedImages[2],
-            globalTHIS.props.battlefieldData.actors.players[playerId].x * tileW,
-            globalTHIS.props.battlefieldData.actors.players[playerId].y * tileH
+            self.state.allLoadedImages[2],
+            self.props.battlefieldData.actors.players[playerId].x * tileW,
+            self.props.battlefieldData.actors.players[playerId].y * tileH
           );
         }
       }
 
       // draw enemies
-      for (let enemyId in globalTHIS.props.battlefieldData.actors.enemies) {
+      for (let enemyId in self.props.battlefieldData.actors.enemies) {
         ctx2.drawImage(
-          globalTHIS.state.allLoadedImages[3],
-          globalTHIS.props.battlefieldData.actors.enemies[enemyId].x * tileW,
-          globalTHIS.props.battlefieldData.actors.enemies[enemyId].y * tileH
+          self.state.allLoadedImages[3],
+          self.props.battlefieldData.actors.enemies[enemyId].x * tileW,
+          self.props.battlefieldData.actors.enemies[enemyId].y * tileH
         );
+      }
+
+      // draw possible skill patterns on tiles
+      if (self.state.skillDirection !== null) {
+        const myX =
+          self.props.battlefieldData.actors.players[self.props.userId].x;
+        const myY =
+          self.props.battlefieldData.actors.players[self.props.userId].y;
+
+        if (self.state.skillSelected !== 0) {
+          const rotatedPatterns = helpers.rotate(
+            skillPatterns[self.state.skillSelected],
+            self.state.skillDirection,
+            myX,
+            myY
+          );
+
+          for (let pattern of rotatedPatterns) {
+            ctx2.fillStyle = "rgba(225,225,225,0.5)";
+            ctx2.fillRect(pattern[0] * tileW, pattern[1] * tileH, tileW, tileH);
+          }
+        }
       }
     }, 200);
   }
@@ -339,7 +365,11 @@ class Battlefield extends Component {
   };
 
   handleSkillPress = skillId => {
-    console.log(`clicked skill: ${skillId}`);
+    this.setState(() => ({
+      skillSelected: skillId
+    }));
+
+    console.log(`Selected skill id: ${skillId}`);
   };
 
   handleTurnEnding = () => {
@@ -378,8 +408,8 @@ class Battlefield extends Component {
 
     for (let player in this.props.battlefieldData.actors.players) {
       if (
-        this.props.battlefieldData.actors.players[player].x == cell[0] &&
-        this.props.battlefieldData.actors.players[player].y == cell[1]
+        this.props.battlefieldData.actors.players[player].x === cell[0] &&
+        this.props.battlefieldData.actors.players[player].y === cell[1]
       ) {
         updateInfoState = {
           name: player,
@@ -397,8 +427,8 @@ class Battlefield extends Component {
 
     for (let enemy in this.props.battlefieldData.actors.enemies) {
       if (
-        this.props.battlefieldData.actors.enemies[enemy].x == cell[0] &&
-        this.props.battlefieldData.actors.enemies[enemy].y == cell[1]
+        this.props.battlefieldData.actors.enemies[enemy].x === cell[0] &&
+        this.props.battlefieldData.actors.enemies[enemy].y === cell[1]
       ) {
         updateInfoState = {
           name: enemy,
@@ -419,6 +449,68 @@ class Battlefield extends Component {
     }));
   };
 
+  handleCanvas2MouseMove = e => {
+    if (this.state.skillSelected !== 0) {
+      let x, y;
+      const canvas2 = this.refs.canvas2;
+
+      let canvas2_rect = canvas2.getBoundingClientRect();
+      x =
+        (e.clientX - canvas2_rect.left) /
+        (canvas2_rect.right - canvas2_rect.left) *
+        canvas2.width;
+      y =
+        (e.clientY - canvas2_rect.top) /
+        (canvas2_rect.bottom - canvas2_rect.top) *
+        canvas2.height;
+
+      // return tile x,y that we clicked
+      var cell = [Math.floor(x / 32), Math.floor(y / 32)];
+
+      const myX = this.props.battlefieldData.actors.players[this.props.userId]
+        .x;
+      const myY = this.props.battlefieldData.actors.players[this.props.userId]
+        .y;
+
+      if (myX + 1 === cell[0] && myY === cell[1]) {
+        if (this.state.skillDirection !== "E") {
+          console.log("E");
+          this.setState(() => ({
+            skillDirection: "E"
+          }));
+        }
+      } else if (myX - 1 === cell[0] && myY === cell[1]) {
+        if (this.state.skillDirection !== "W") {
+          console.log("W");
+          this.setState(() => ({
+            skillDirection: "W"
+          }));
+        }
+      } else if (myY + 1 === cell[1] && myX === cell[0]) {
+        if (this.state.skillDirection !== "S") {
+          console.log("S");
+          this.setState(() => ({
+            skillDirection: "S"
+          }));
+        }
+      } else if (myY - 1 === cell[1] && myX === cell[0]) {
+        if (this.state.skillDirection !== "N") {
+          console.log("N");
+          this.setState(() => ({
+            skillDirection: "N"
+          }));
+        }
+      } else {
+        if (this.state.skillDirection !== null) {
+          console.log("skillDirection: null");
+          this.setState(() => ({
+            skillDirection: null
+          }));
+        }
+      }
+    }
+  };
+
   handleAttackEnemy = () => {
     this.props.socket.emit("playerAttackedEnemy", {
       // enemyId: this.state.info.name,
@@ -432,8 +524,8 @@ class Battlefield extends Component {
     let playerMultiplierOrSpinner = this.state.playersMultiplier;
     let enemyMultiplierOrSpinner = this.state.enemiesMultiplier;
     if (this.state.showSpinner) {
-      playerMultiplierOrSpinner = <img src={spinner} />;
-      enemyMultiplierOrSpinner = <img src={spinner} />;
+      playerMultiplierOrSpinner = <img src={spinner} alt="" />;
+      enemyMultiplierOrSpinner = <img src={spinner} alt="" />;
     }
 
     return (
@@ -443,6 +535,7 @@ class Battlefield extends Component {
             <canvas ref="canvas1" style={{ width: "640", height: "360" }} />
             <canvas
               ref="canvas2"
+              onMouseMove={e => this.handleCanvas2MouseMove(e)}
               onClick={e => this.handleCanvas2Click(e)}
               style={{ width: "640", height: "360" }}
             />
@@ -727,8 +820,9 @@ class Battlefield extends Component {
             alt=""
             src={skill0}
             style={{
-              height: 42 + "px",
-              width: 42 + "px",
+              cursor: "pointer",
+              height: 60 + "px",
+              width: 60 + "px",
               marginLeft: 5 + "px"
             }}
           />
@@ -737,8 +831,9 @@ class Battlefield extends Component {
             alt=""
             src={skill1}
             style={{
-              height: 42 + "px",
-              width: 42 + "px",
+              cursor: "pointer",
+              height: 60 + "px",
+              width: 60 + "px",
               marginLeft: 5 + "px"
             }}
           />
@@ -747,8 +842,9 @@ class Battlefield extends Component {
             alt=""
             src={skill2}
             style={{
-              height: 42 + "px",
-              width: 42 + "px",
+              cursor: "pointer",
+              height: 60 + "px",
+              width: 60 + "px",
               marginLeft: 5 + "px"
             }}
           />
@@ -757,8 +853,9 @@ class Battlefield extends Component {
             alt=""
             src={skill3}
             style={{
-              height: 42 + "px",
-              width: 42 + "px",
+              cursor: "pointer",
+              height: 60 + "px",
+              width: 60 + "px",
               marginLeft: 5 + "px"
             }}
           />
@@ -767,8 +864,9 @@ class Battlefield extends Component {
             alt=""
             src={skill4}
             style={{
-              height: 42 + "px",
-              width: 42 + "px",
+              cursor: "pointer",
+              height: 60 + "px",
+              width: 60 + "px",
               marginLeft: 5 + "px"
             }}
           />
@@ -777,8 +875,9 @@ class Battlefield extends Component {
             alt=""
             src={skill5}
             style={{
-              height: 42 + "px",
-              width: 42 + "px",
+              cursor: "pointer",
+              height: 60 + "px",
+              width: 60 + "px",
               marginLeft: 5 + "px"
             }}
           />
