@@ -28,8 +28,15 @@ class Battlefield extends Component {
     playersMultiplier: "0%",
     enemiesMultiplier: "0%",
     showSpinner: false,
+    skillInRange: false,
     skillSelected: 0,
     skillDirection: null,
+    skillDistance: null,
+    skillRange: null,
+    mousePos: {
+      x: null,
+      y: null
+    },
     info: {
       name: "",
       hpLeft: 0,
@@ -155,27 +162,55 @@ class Battlefield extends Component {
         );
       }
 
-      // draw possible skill patterns on tiles
-      if (self.state.skillDirection !== null) {
-        const myX =
-          self.props.battlefieldData.actors.players[self.props.userId].x;
-        const myY =
-          self.props.battlefieldData.actors.players[self.props.userId].y;
+      // if i have selected a skill and hover over canvas
+      if (
+        self.state.skillSelected !== 0 &&
+        self.state.mousePos.x !== 0 &&
+        self.state.mousePos.y !== 0
+      ) {
+        if (self.state.skillDistance === "far" && self.state.skillInRange) {
+          const patterns = skillPatterns[self.state.skillSelected].pattern;
 
-        if (self.state.skillSelected !== 0) {
-          const rotatedPatterns = helpers.rotate(
-            skillPatterns[self.state.skillSelected],
-            self.state.skillDirection,
-            myX,
-            myY
-          );
-
-          for (let pattern of rotatedPatterns) {
+          for (let pattern of patterns) {
             ctx2.fillStyle = "rgba(225,225,225,0.5)";
-            ctx2.fillRect(pattern[0] * tileW, pattern[1] * tileH, tileW, tileH);
+            ctx2.fillRect(
+              (pattern[0] + self.state.mousePos.x) * tileW,
+              (pattern[1] + self.state.mousePos.y) * tileH,
+              tileW,
+              tileH
+            );
+          }
+        } else if (
+          self.state.skillDistance === "close" &&
+          self.state.skillDirection !== null
+        ) {
+          const myX =
+            self.props.battlefieldData.actors.players[self.props.userId].x;
+          const myY =
+            self.props.battlefieldData.actors.players[self.props.userId].y;
+
+          if (self.state.skillSelected !== 0) {
+            const rotatedPatterns = helpers.rotate(
+              skillPatterns[self.state.skillSelected].pattern,
+              self.state.skillDirection,
+              myX,
+              myY
+            );
+
+            for (let pattern of rotatedPatterns) {
+              ctx2.fillStyle = "rgba(225,225,225,0.5)";
+              ctx2.fillRect(
+                pattern[0] * tileW,
+                pattern[1] * tileH,
+                tileW,
+                tileH
+              );
+            }
           }
         }
       }
+
+      /////////////////////////////////////////////////
     }, 200);
   }
 
@@ -364,9 +399,23 @@ class Battlefield extends Component {
     });
   };
 
+  handleSkillUnselecting = () => {
+    this.setState(() => ({
+      skillInRange: false,
+      skillSelected: 0,
+      skillDirection: null,
+      skillDistance: null,
+      skillRange: null
+    }));
+
+    console.log(`Skills unselected`);
+  };
+
   handleSkillPress = skillId => {
     this.setState(() => ({
-      skillSelected: skillId
+      skillSelected: skillId,
+      skillDistance: skillPatterns[skillId].distance,
+      skillRange: skillPatterns[skillId].range
     }));
 
     console.log(`Selected skill id: ${skillId}`);
@@ -395,57 +444,84 @@ class Battlefield extends Component {
     // return tile x,y that we clicked
     var cell = [Math.floor(x / 32), Math.floor(y / 32)];
 
-    let updateInfoState = {
-      name: "",
-      hpLeft: 0,
-      hpFull: 0,
-      attack: "",
-      defence: "",
-      positionX: cell[0],
-      positionY: cell[1],
-      actionPoints: 0
-    };
+    // if no skill selected then display tile information else attack
+    if (this.state.skillSelected === 0) {
+      let updateInfoState = {
+        name: "",
+        hpLeft: 0,
+        hpFull: 0,
+        attack: "",
+        defence: "",
+        positionX: cell[0],
+        positionY: cell[1],
+        actionPoints: 0
+      };
 
-    for (let player in this.props.battlefieldData.actors.players) {
-      if (
-        this.props.battlefieldData.actors.players[player].x === cell[0] &&
-        this.props.battlefieldData.actors.players[player].y === cell[1]
-      ) {
-        updateInfoState = {
-          name: player,
-          hpLeft: this.props.battlefieldData.actors.players[player].hpLeft,
-          hpFull: this.props.battlefieldData.actors.players[player].hpFull,
-          attack: this.props.battlefieldData.actors.players[player].attack,
-          defence: this.props.battlefieldData.actors.players[player].defence,
-          positionX: this.props.battlefieldData.actors.players[player].x,
-          positionY: this.props.battlefieldData.actors.players[player].y,
-          actionPoints: this.props.battlefieldData.actors.players[player]
-            .actionPoints
-        };
+      for (let player in this.props.battlefieldData.actors.players) {
+        if (
+          this.props.battlefieldData.actors.players[player].x === cell[0] &&
+          this.props.battlefieldData.actors.players[player].y === cell[1]
+        ) {
+          updateInfoState = {
+            name: player,
+            hpLeft: this.props.battlefieldData.actors.players[player].hpLeft,
+            hpFull: this.props.battlefieldData.actors.players[player].hpFull,
+            attack: this.props.battlefieldData.actors.players[player].attack,
+            defence: this.props.battlefieldData.actors.players[player].defence,
+            positionX: this.props.battlefieldData.actors.players[player].x,
+            positionY: this.props.battlefieldData.actors.players[player].y,
+            actionPoints: this.props.battlefieldData.actors.players[player]
+              .actionPoints
+          };
+        }
+      }
+
+      for (let enemy in this.props.battlefieldData.actors.enemies) {
+        if (
+          this.props.battlefieldData.actors.enemies[enemy].x === cell[0] &&
+          this.props.battlefieldData.actors.enemies[enemy].y === cell[1]
+        ) {
+          updateInfoState = {
+            name: enemy,
+            hpLeft: this.props.battlefieldData.actors.enemies[enemy].hpLeft,
+            hpFull: this.props.battlefieldData.actors.enemies[enemy].hpFull,
+            attack: this.props.battlefieldData.actors.enemies[enemy].attack,
+            defence: this.props.battlefieldData.actors.enemies[enemy].defence,
+            positionX: this.props.battlefieldData.actors.enemies[enemy].x,
+            positionY: this.props.battlefieldData.actors.enemies[enemy].y,
+            actionPoints: this.props.battlefieldData.actors.enemies[enemy]
+              .actionPoints
+          };
+        }
+      }
+
+      this.setState(() => ({
+        info: updateInfoState
+      }));
+    } else {
+      // if skill is selected and in range then perform skill on selected tile
+      if (this.state.skillInRange || this.state.skillDirection) {
+        console.log(
+          `Attacked position x: ${cell[0]} y: ${cell[1]} skillId: ${
+            this.state.skillSelected
+          }`
+        );
+        this.props.socket.emit("playerAttackedEnemy", {
+          // enemyId: this.state.info.name,
+          x: cell[0],
+          y: cell[1],
+          skillId: this.state.skillSelected
+        });
+
+        this.handleSkillUnselecting();
       }
     }
+  };
 
-    for (let enemy in this.props.battlefieldData.actors.enemies) {
-      if (
-        this.props.battlefieldData.actors.enemies[enemy].x === cell[0] &&
-        this.props.battlefieldData.actors.enemies[enemy].y === cell[1]
-      ) {
-        updateInfoState = {
-          name: enemy,
-          hpLeft: this.props.battlefieldData.actors.enemies[enemy].hpLeft,
-          hpFull: this.props.battlefieldData.actors.enemies[enemy].hpFull,
-          attack: this.props.battlefieldData.actors.enemies[enemy].attack,
-          defence: this.props.battlefieldData.actors.enemies[enemy].defence,
-          positionX: this.props.battlefieldData.actors.enemies[enemy].x,
-          positionY: this.props.battlefieldData.actors.enemies[enemy].y,
-          actionPoints: this.props.battlefieldData.actors.enemies[enemy]
-            .actionPoints
-        };
-      }
-    }
-
+  handleCanvas2MouseLeave = e => {
+    console.log("mouse left canvas");
     this.setState(() => ({
-      info: updateInfoState
+      mousePos: { ...this.state.mousePos, x: null, y: null }
     }));
   };
 
@@ -464,13 +540,44 @@ class Battlefield extends Component {
         (canvas2_rect.bottom - canvas2_rect.top) *
         canvas2.height;
 
-      // return tile x,y that we clicked
-      var cell = [Math.floor(x / 32), Math.floor(y / 32)];
-
       const myX = this.props.battlefieldData.actors.players[this.props.userId]
         .x;
       const myY = this.props.battlefieldData.actors.players[this.props.userId]
         .y;
+
+      // return tile x,y that user mouseover
+      var cell = [Math.floor(x / 32), Math.floor(y / 32)];
+
+      if (cell[0] !== this.state.mousePos.x) {
+        // console.log(`updated mousePos.x=${cell[0]}`);
+        // Math.hypot(x2-x1, y2-y1) calculates distance between two points
+        const distance = Math.floor(Math.hypot(cell[0] - myX, cell[1] - myY));
+        let inRange = false;
+        console.log(`Distance: ${distance}`);
+
+        if (this.state.skillRange >= distance) {
+          inRange = true;
+        }
+
+        this.setState(() => ({
+          skillInRange: inRange,
+          mousePos: { ...this.state.mousePos, x: cell[0] }
+        }));
+      }
+      if (cell[1] !== this.state.mousePos.y) {
+        // console.log(`updated mousePos.y=${cell[1]}`);
+        const distance = Math.floor(Math.hypot(cell[0] - myX, cell[1] - myY));
+        let inRange = false;
+        console.log(`Distance: ${distance}`);
+
+        if (this.state.skillRange >= distance) {
+          inRange = true;
+        }
+        this.setState(() => ({
+          skillInRange: inRange,
+          mousePos: { ...this.state.mousePos, y: cell[1] }
+        }));
+      }
 
       if (myX + 1 === cell[0] && myY === cell[1]) {
         if (this.state.skillDirection !== "E") {
@@ -511,15 +618,6 @@ class Battlefield extends Component {
     }
   };
 
-  handleAttackEnemy = () => {
-    this.props.socket.emit("playerAttackedEnemy", {
-      // enemyId: this.state.info.name,
-      x: this.state.info.positionX,
-      y: this.state.info.positionY,
-      skillId: this.state.skillSelected
-    });
-  };
-
   render() {
     let playerMultiplierOrSpinner = this.state.playersMultiplier;
     let enemyMultiplierOrSpinner = this.state.enemiesMultiplier;
@@ -536,6 +634,7 @@ class Battlefield extends Component {
             <canvas
               ref="canvas2"
               onMouseMove={e => this.handleCanvas2MouseMove(e)}
+              onMouseLeave={e => this.handleCanvas2MouseLeave(e)}
               onClick={e => this.handleCanvas2Click(e)}
               style={{ width: "640", height: "360" }}
             />
@@ -803,8 +902,6 @@ class Battlefield extends Component {
                 </tr>
               </tbody>
             </table>
-
-            <button onClick={() => this.handleAttackEnemy()}>ATTACK</button>
           </div>
         </div>
 
@@ -816,7 +913,7 @@ class Battlefield extends Component {
           }}
         >
           <img
-            onClick={() => this.handleSkillPress(0)}
+            onClick={() => this.handleSkillUnselecting()}
             alt=""
             src={skill0}
             style={{
@@ -874,6 +971,28 @@ class Battlefield extends Component {
             onClick={() => this.handleSkillPress(5)}
             alt=""
             src={skill5}
+            style={{
+              cursor: "pointer",
+              height: 60 + "px",
+              width: 60 + "px",
+              marginLeft: 5 + "px"
+            }}
+          />
+          <img
+            onClick={() => this.handleSkillPress(6)}
+            alt=""
+            src={skill2}
+            style={{
+              cursor: "pointer",
+              height: 60 + "px",
+              width: 60 + "px",
+              marginLeft: 5 + "px"
+            }}
+          />
+          <img
+            onClick={() => this.handleSkillPress(7)}
+            alt=""
+            src={skill3}
             style={{
               cursor: "pointer",
               height: 60 + "px",
