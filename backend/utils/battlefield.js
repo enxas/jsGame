@@ -289,7 +289,7 @@ console.log(enemiesWithTargets);
 
 exports.playerAttackedEnemy = (socket, callback, attackData) => {
   // attackData = { removed - enemyId: '', 
-  // x: 14, y: 9, skillId: 0 }
+  // x: 14, y: 9, skillId: 0, skillDirection: 'E' }
   PartyMember.findOne({ userId: socket.userId })
   .exec()
   .then(member => {
@@ -299,94 +299,33 @@ exports.playerAttackedEnemy = (socket, callback, attackData) => {
     .then(bfInfo => {
 
       let actionPoints = bfInfo.actors.players[socket.userId].actionPoints;
-      let newActionPoints = actionPoints - 2;
+
         if (actionPoints > 1) {
-let direction;
-          // TODO: check if a player has a skill that he is using
-// get direction of used skill (N, E, S, W)
-if (attackData.x > bfInfo.actors.players[socket.userId].x) {
-  direction = 'E';
-}else if (attackData.x < bfInfo.actors.players[socket.userId].x) {
-  direction = 'W';
-}else if (attackData.y > bfInfo.actors.players[socket.userId].y) {
-  direction = 'S';
-}else if (attackData.y < bfInfo.actors.players[socket.userId].y) {
-  direction = 'N';
-}
+          // TODO: check if a player owns a skill that he is using
 
+          // TODO: check if player is actually in range to perform used skill
 
-
-const callback_combatLog = combatLog => {
-  return callback({
-    partyId: member.partyId,
-    userId: socket.userId,
-    combatLog: combatLog
-  });
-};
-
-     skills.calculateDamage(attackData.x, attackData.y, attackData.skillId, bfInfo, direction, bfInfo.actors.players[socket.userId].x, bfInfo.actors.players[socket.userId].y,socket.userId, member.partyId, callback_combatLog);
- 
-     
-
-
-/*
-      for (let enemy in bfInfo.actors.enemies) {
-        if (bfInfo.actors.enemies[enemy].x === attackData.x && bfInfo.actors.enemies[enemy].y === attackData.y) {
-          console.log('found enemy');
-          const multipliers = [];
-          const min = -40;
-          const max = 40;
-      
-          // player multipliers[0] and enemy multipliers[1] multiplier
-          multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
-          multipliers.push(Math.floor(Math.random() * (max - min + 1)) + min);
-      
-          Math.abs(multipliers[0])
-          Math.abs(multipliers[1])
-      
-          let playerAttackMultiplier = bfInfo.actors.players[socket.userId].attack / 100 * multipliers[0];
-          let enemyDefenceMultiplier = bfInfo.actors.enemies[enemy].defence / 100 * multipliers[1];
-      
-          let damage = parseInt((bfInfo.actors.players[socket.userId].attack + playerAttackMultiplier) - (bfInfo.actors.enemies[enemy].defence + enemyDefenceMultiplier));
-          console.log(`dmage: ${damage}`);
-          if (damage > 0) {
-            let enemyLeftHealth = bfInfo.actors.enemies[enemy].hpLeft - damage;
-            console.log(`enemyLeftHealth: ${enemyLeftHealth}`);
-              const leftHealth = 'actors.enemies.'+ enemy + '.hpLeft';
-              const playersActionPoints = 'actors.players.'+ socket.userId + '.actionPoints';
-      
-              Battlefield.update({partyId: member.partyId}, {'$set': {
-                [leftHealth]: enemyLeftHealth,
-                [playersActionPoints]: newActionPoints,
-              }}, function (err, success) {
-                if (err) {
-                
-                } else {
-                  return callback({
-                    partyId: member.partyId,
-                    userId: socket.userId,
-                    actionPoints: newActionPoints
-                  });
-      
-                }
-            });
-          } else {
-            damage = 0;
+          const callback_combatLog = combatLog => {
             return callback({
               partyId: member.partyId,
               userId: socket.userId,
-              actionPoints: newActionPoints
+              combatLog: combatLog
             });
-          }
+          };
 
+          skills.calculateDamage(
+            attackData.x, 
+            attackData.y, 
+            attackData.skillId, 
+            bfInfo, 
+            attackData.skillDirection, 
+            bfInfo.actors.players[socket.userId].x, 
+            bfInfo.actors.players[socket.userId].y,
+            socket.userId, 
+            member.partyId, 
+            callback_combatLog
+          );
         }
-      }
-*/
-
-
-    }
-   
-  
 
     }).catch(err => {
       console.log(err);

@@ -276,31 +276,6 @@ class Battlefield extends Component {
       console.log("onPlayerAttackedEnemy:");
       console.log(data);
       this.props.onPlayerAttackedEnemy(data);
-      // let formattedPlayerMultipl, formattedEnemyMultipl;
-
-      // if (data.userId === this.props.userId) {
-      //   if (data.multipliers[0] > 0) {
-      //     formattedPlayerMultipl = "+" + data.multipliers[0] + "%";
-      //   } else if (data.multipliers[0] < 0) {
-      //     formattedPlayerMultipl = data.multipliers[0] + "%";
-      //   } else {
-      //     formattedPlayerMultipl = data.multipliers[0] + "%";
-      //   }
-
-      //   if (data.multipliers[1] > 0) {
-      //     formattedEnemyMultipl = "+" + data.multipliers[1] + "%";
-      //   } else if (data.multipliers[1] < 0) {
-      //     formattedEnemyMultipl = data.multipliers[1] + "%";
-      //   } else {
-      //     formattedEnemyMultipl = data.multipliers[1] + "%";
-      //   }
-
-      //   this.setState(() => ({
-      //     playersMultiplier: formattedPlayerMultipl,
-      //     enemiesMultiplier: formattedEnemyMultipl,
-      //     showSpinner: false
-      //   }));
-      // }
 
       for (let logEntry in data.combatLog) {
         let addedToChat = [
@@ -311,7 +286,14 @@ class Battlefield extends Component {
             data.combatLog[logEntry].damage +
             " damage to " +
             data.combatLog[logEntry].attackedActor +
-            " !"
+            " with " +
+            skillPatterns[data.combatLog[logEntry].skillId].name +
+            " " +
+            data.combatLog[logEntry].attackPts +
+            " atk vs " +
+            data.combatLog[logEntry].defencePts +
+            " def " +
+            "!"
         ];
 
         this.setState(() => ({
@@ -510,7 +492,8 @@ class Battlefield extends Component {
           // enemyId: this.state.info.name,
           x: cell[0],
           y: cell[1],
-          skillId: this.state.skillSelected
+          skillId: this.state.skillSelected,
+          skillDirection: this.state.skillDirection
         });
 
         this.handleSkillUnselecting();
