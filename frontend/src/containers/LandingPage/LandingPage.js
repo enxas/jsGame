@@ -12,6 +12,25 @@ class LandingPage extends Component {
             You probably want to <Link to="/signin">Sign In</Link> or{" "}
             <Link to="/signup">Sign Up</Link>
           </span>
+          <br />
+          <br />
+          <span>
+            <center>
+              <div
+                style={{
+                  position: "fixed",
+                  textSlign: "center",
+                  bottom: "0px"
+                }}
+              >
+                <br />
+                <b>
+                  You can find source code of this project on{" "}
+                  <a href="https://github.com/enxas/jsGame">GitHub</a>
+                </b>
+              </div>
+            </center>
+          </span>
         </div>
       </div>
     );

@@ -59,8 +59,6 @@ class Home extends Component {
           You can:
           <Link to="/logout">Logout</Link>
           <br />
-          <Link to="/battlefield">Battlefield</Link>
-          <br />
           <Link to="/party/create">Create Party</Link>
           <br />
           <Link to="/party/leave">Leave Party</Link>

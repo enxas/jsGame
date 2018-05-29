@@ -176,29 +176,6 @@ async function makeTurn (partyId, io) {
         }
     });
 
-     
-
-
-//     const playersObj = {};
-//     for (let player3 in bfInfo.actors.players) {
-// let key = 'actors.players.'+ player3 + '.isEndedTurn';
-//         playersObj[key] = false;
-     
-
-//       const playersKey = 'actors.players.'+ player3 + '.isEndedTurn';
-//       Battlefield.update({partyId: partyId}, {'$set': {
-//         [playersKey]: false
-//       }}, function (err, success) {
-//         if (err) {
-//          console.log('Error occurred in a enemyActions.js makeTurn() method (5)');
-//         console.log(err);
-//         } else {
-
-
-//         }
-//       });
-//     }
-
 
     }).catch(err => {
       console.log('Error occurred in a enemyActions.js makeTurn() method (6)');
@@ -209,7 +186,7 @@ async function makeTurn (partyId, io) {
   }
   console.log('---------------------');
   console.log("TICK " + i);
-  } // end if movementFunc
+  } // end of movementFunc
 var interval = setInterval(movementFunc, 1900);
 movementFunc();
 
