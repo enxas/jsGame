@@ -302,7 +302,7 @@ class Battlefield extends Component {
       }
 
       // make chat scroll
-      this.chatboxRef.current.scrollTop = 999999;
+      this.chatboxRef.current.scrollTop = 9999999;
     });
 
     this.props.socket.on("onActorMovedInBattlefield", data => {

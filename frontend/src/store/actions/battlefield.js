@@ -11,11 +11,12 @@ export const getBattlefieldData = data => {
 
 export const enteredBattlefield = () => {
   return dispatch => {
-    let url = "/battlefield";
+    let url = "/battlefield/ready";
 
     axios
       .get(url)
       .then(response => {
+        console.log("[action.battlefield.js] enteredBattlefield():");
         console.log(response.data);
         dispatch(getBattlefieldData(response.data));
       })

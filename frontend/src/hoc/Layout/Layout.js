@@ -6,10 +6,17 @@ import socketIOClient from "socket.io-client";
 import * as actions from "../../store/actions/index";
 import toastr from "toastr";
 import { withRouter } from "react-router-dom";
+import ReadyScreen from "../../containers/ReadyScreen/ReadyScreen";
 
 class Layout extends Component {
   state = {
-    visitorCount: 0
+    visitorCount: 0,
+    decks: [{ id: 0, name: "Default" }, { id: 1, name: "Custom" }],
+    heroes: ["hero1", "hero2", "hero3"],
+    showReadyScreen: false,
+    playerCount: 0,
+    floorLvl: 0,
+    readyPlayers: 0
   };
   componentDidMount() {
     if (this.props.socket === null) {
@@ -65,6 +72,45 @@ class Layout extends Component {
         };
         toastr.info("Party leader entered battlefield!", "Party");
         this.props.onLeaderEnteredBattlefield(data);
+      });
+
+      socket.on("leaderReadyPrompt", data => {
+        toastr.options = {
+          closeButton: true,
+          progressBar: true
+        };
+        toastr.info("Party leader prompted Ready Screen!", "Party");
+        console.log(data);
+
+        this.setState(prevState => ({
+          showReadyScreen: true,
+          playerCount: data.memberCount,
+          floorLvl: data.floorLvl
+        }));
+      });
+
+      socket.on("r_memberNotReady", data => {
+        toastr.options = {
+          closeButton: true,
+          progressBar: true
+        };
+        toastr.info("Player " + data.userId + " clicked Not Ready!", "Party");
+        console.log(`Player clicked not ready ${data}`);
+
+        this.setState(prevState => ({
+          showReadyScreen: false
+        }));
+      });
+
+      socket.on("r_memberReady", data => {
+        console.log(`Player clicked ready:`);
+        console.log(data);
+
+        if (data.error === undefined) {
+          this.setState(prevState => ({
+            readyPlayers: prevState.readyPlayers + 1
+          }));
+        }
       });
 
       socket.on("onConnectedToBattlefield", data => {
@@ -159,6 +205,14 @@ class Layout extends Component {
     return (
       <Wrap>
         {redirect}
+        <ReadyScreen
+          show={this.state.showReadyScreen}
+          decks={this.state.decks}
+          heroes={this.state.heroes}
+          floor={this.state.floorLvl}
+          playerCount={this.state.playerCount}
+          readyPlayers={this.state.readyPlayers}
+        />
         <Navbar visitorCount={this.state.visitorCount} />
 
         <main>{this.props.children}</main>

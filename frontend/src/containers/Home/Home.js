@@ -15,16 +15,9 @@ class Home extends Component {
   }
 
   handleBattlefieldEnter = () => {
-    console.log("pressed handleBattlefieldEnter button");
+    console.log("Leader pressed handleBattlefieldEnter() button");
 
     this.props.onEnteredBattlefield();
-
-    // this.props.onSignIn(this.state.email, this.state.password);
-
-    // this.setState(() => ({
-    //   isButtonLoading: ["button", "is-success"],
-    //   isAuthenticated: true
-    // }));
   };
 
   render() {
@@ -42,12 +35,14 @@ class Home extends Component {
                 return <div key={index}>{member}</div>;
               })}
               <br />
-              <button
-                className={["button", "is-link"].join(" ")}
-                onClick={this.handleBattlefieldEnter}
-              >
-                Enter Dungeon
-              </button>
+              {this.props.partyInfo.rank === "leader" ? (
+                <button
+                  className={["button", "is-link"].join(" ")}
+                  onClick={this.handleBattlefieldEnter}
+                >
+                  Enter Dungeon
+                </button>
+              ) : null}
             </div>
           </div>
         </div>

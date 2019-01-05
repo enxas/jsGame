@@ -13,6 +13,7 @@ import * as actions from "./store/actions/index";
 import Layout from "./hoc/Layout/Layout";
 import ListParty from "./containers/Party/List/List";
 import Battlefield from "./containers/Battlefield/Battlefield";
+import Fight from "./containers/Auth/Fight/Fight";
 
 class App extends Component {
   componentDidMount() {
@@ -23,6 +24,7 @@ class App extends Component {
       <Switch>
         <Route path="/signup" component={Signup} />
         <Route path="/signin" component={Signin} />
+        <Route path="/fight" component={Fight} />
         <Route path="/" exact component={LandingPage} />
         <Redirect to="/" />
       </Switch>

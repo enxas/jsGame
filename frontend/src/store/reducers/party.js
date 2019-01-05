@@ -8,6 +8,7 @@ const initialState = {
   partyInfo: {
     id: null,
     floor: null,
+    rank: null,
     members: []
   }
 };
@@ -38,6 +39,7 @@ const reducer = (state = initialState, action) => {
         partyInfo: {
           id: action.partyId,
           floor: action.floor,
+          rank: "leader",
           members: action.members
         }
       };
